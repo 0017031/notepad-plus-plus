@@ -31,6 +31,7 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <uxtheme.h>
+#include <locale>
 #include "pluginsAdmin.h"
 #include "ScintillaEditView.h"
 #include "localization.h"
@@ -110,7 +111,7 @@ bool findStrNoCase(const generic_string & strHaystack, const generic_string & st
 	auto it = std::search(
 		strHaystack.begin(), strHaystack.end(),
 		strNeedle.begin(), strNeedle.end(),
-		[](char ch1, char ch2){return std::toupper(ch1) == std::toupper(ch2); }
+	    [](auto ch1, auto ch2) {return std::toupper(ch1, locale()) == std::toupper(ch2, locale()); }
 	);
 	return (it != strHaystack.end());
 }
