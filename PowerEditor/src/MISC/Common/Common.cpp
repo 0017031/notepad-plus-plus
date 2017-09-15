@@ -29,6 +29,7 @@
 #include <shlwapi.h>
 #include <shlobj.h>
 #include <uxtheme.h>
+#include <locale>
 #include "StaticDialog.h"
 
 #include "Common.h"
@@ -765,7 +766,8 @@ COLORREF getCtrlBgColor(HWND hWnd)
 
 generic_string stringToUpper(generic_string strToConvert)
 {
-    std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(), ::toupper);
+    std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(), 
+        [](auto c) {return std::toupper(c, std::locale()); });
     return strToConvert;
 }
 
