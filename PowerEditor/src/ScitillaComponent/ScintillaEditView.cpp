@@ -206,16 +206,16 @@ HMODULE loadSciLexerDll()
 {
 	generic_string sciLexerPath = getSciLexerFullPathName(moduleFileName, 1024);
 
-	bool isOK = VerifySignedLibrary(sciLexerPath, SCINTILLA_SIGNER_KEY_ID, SCINTILLA_SIGNER_SUBJECT, SCINTILLA_SIGNER_DISPLAY_NAME, false, false);
+	//bool isOK = VerifySignedLibrary(sciLexerPath, SCINTILLA_SIGNER_KEY_ID, SCINTILLA_SIGNER_SUBJECT, SCINTILLA_SIGNER_DISPLAY_NAME, false, false);
 
-	if (!isOK)
-	{
-		::MessageBox(NULL,
-			TEXT("Authenticode check failed: signature or signing certificate are not recognized"),
-			TEXT("Library verification failed"),
-			MB_OK | MB_ICONERROR);
-		return nullptr;
-	}
+	//if (!isOK)
+	//{
+	//	::MessageBox(NULL,
+	//		TEXT("Authenticode check failed: signature or signing certificate are not recognized"),
+	//		TEXT("Library verification failed"),
+	//		MB_OK | MB_ICONERROR);
+	//	return nullptr;
+	//}
 
 	return ::LoadLibrary(sciLexerPath.c_str());
 }
