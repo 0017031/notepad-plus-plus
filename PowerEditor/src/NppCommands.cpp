@@ -787,17 +787,17 @@ void Notepad_plus::command(int id)
 			const int index = id - IDM_VIEW_TAB1;
 			BufferID buf = _pDocTab->getBufferByIndex(index);
 			_isFolding = true;
-			if (buf == BUFFER_INVALID)
+			if(buf == BUFFER_INVALID)
 			{
 				// No buffer at chosen index, select the very last buffer instead.
 				const int last_index = _pDocTab->getItemCount() - 1;
-				if (last_index > 0)
+				if(last_index > 0)
 					switchToFile(_pDocTab->getBufferByIndex(last_index));
 			}
 			else
 			{
 				switchToFile(buf);
-			}
+		}
 			_isFolding = false;
 		}
 		break;
@@ -807,12 +807,12 @@ void Notepad_plus::command(int id)
 			const int current_index = _pDocTab->getCurrentTabIndex();
 			const int last_index = _pDocTab->getItemCount() - 1;
 			_isFolding = true;
-			if (current_index < last_index)
+			if(current_index < last_index)
 				switchToFile(_pDocTab->getBufferByIndex(current_index + 1));
 			else
 			{
 				switchToFile(_pDocTab->getBufferByIndex(0)); // Loop around.
-			}
+		}
 			_isFolding = false;
 		}
 		break;
@@ -821,7 +821,7 @@ void Notepad_plus::command(int id)
 		{
 			const int current_index = _pDocTab->getCurrentTabIndex();
 			_isFolding = true;
-			if (current_index > 0)
+			if(current_index > 0)
 				switchToFile(_pDocTab->getBufferByIndex(current_index - 1));
 			else
 			{
@@ -1071,29 +1071,34 @@ void Notepad_plus::command(int id)
 				_findReplaceDlg.setStatusbarMessage(msg, FSTopReached);
 			}
         }
-		break;
+			break;
 
 		case IDM_SEARCH_GOTONEXTFOUND:
 		{
 			_findReplaceDlg.gotoNextFoundResult();
 		}
-		break;
+			break;
 
 		case IDM_SEARCH_GOTOPREVFOUND:
 		{
 			_findReplaceDlg.gotoNextFoundResult(-1);
 		}
-		break;
+			break;
 
 		case IDM_FOCUS_ON_FOUND_RESULTS:
 		{
-			if (GetFocus() == _findReplaceDlg.getHFindResults())
-				// focus already on found results, switch to current edit view
+			// toggle display of finder
+			if(_findReplaceDlg.isFinderVisible())
+			{
+				_findReplaceDlg.hideFinder();
 				switchEditViewTo(currentView());
+			}
 			else
+			{
 				_findReplaceDlg.focusOnFinder();
-		}
-		break;
+            }
+         }
+		 break;
 
 		case IDM_SEARCH_VOLATILE_FINDNEXT :
 		case IDM_SEARCH_VOLATILE_FINDPREV :
@@ -1118,7 +1123,7 @@ void Notepad_plus::command(int id)
 				_findReplaceDlg.setStatusbarMessage(msg, FSTopReached);
 			}
 		}
-		break;
+			break;
 
 		case IDM_SEARCH_MARKALLEXT1 :
 		case IDM_SEARCH_MARKALLEXT2 :
@@ -1154,7 +1159,7 @@ void Notepad_plus::command(int id)
 				_findReplaceDlg.markAll(text2Find, styleID, lstrlen(text2Find) == lstrlen(text2Find2));
 			}
 		}
-		break;
+			break;
 
 		case IDM_SEARCH_UNMARKALLEXT1 :
 		case IDM_SEARCH_UNMARKALLEXT2 :
@@ -1176,7 +1181,7 @@ void Notepad_plus::command(int id)
 
 			_pEditView->clearIndicator(styleID);
 		}
-		break;
+			break;
 
 		case IDM_SEARCH_GONEXTMARKER1 :
 		case IDM_SEARCH_GONEXTMARKER2 :
@@ -1201,7 +1206,7 @@ void Notepad_plus::command(int id)
 
 			goToNextIndicator(styleID);
 		}
-		break;
+			break;
 
 		case IDM_SEARCH_GOPREVMARKER1 :
 		case IDM_SEARCH_GOPREVMARKER2 :
@@ -1224,9 +1229,9 @@ void Notepad_plus::command(int id)
 			else // (id == IDM_SEARCH_GOPREVMARKER_DEF)
 				styleID = SCE_UNIVERSAL_FOUND_STYLE;
 
-			goToPreviousIndicator(styleID);	
+			goToPreviousIndicator(styleID);
 		}
-		break;
+			break;
 
 		case IDM_SEARCH_CLEARALLMARKS :
 		{
@@ -1236,7 +1241,7 @@ void Notepad_plus::command(int id)
 			_pEditView->clearIndicator(SCE_UNIVERSAL_FOUND_STYLE_EXT4);
 			_pEditView->clearIndicator(SCE_UNIVERSAL_FOUND_STYLE_EXT5);
 		}
-		break;
+			break;
 
         case IDM_SEARCH_GOTOLINE :
 		{
@@ -1245,7 +1250,7 @@ void Notepad_plus::command(int id)
 			if (isFirstTime)
 				_nativeLangSpeaker.changeDlgLang(_goToLineDlg.getHSelf(), "GoToLine");
 		}
-		break;
+			break;
 
 		case IDM_SEARCH_FINDCHARINRANGE :
 		{
@@ -1254,7 +1259,7 @@ void Notepad_plus::command(int id)
 			if (isFirstTime)
 				_nativeLangSpeaker.changeDlgLang(_findCharsInRangeDlg.getHSelf(), "FindCharsInRange");
 		}
-		break;
+			break;
 
         case IDM_EDIT_COLUMNMODETIP :
 		{
@@ -1264,7 +1269,7 @@ void Notepad_plus::command(int id)
 					TEXT("Column Mode Tip"),
 					MB_OK|MB_APPLMODAL);
 		}
-		break;
+			break;
 
         case IDM_EDIT_COLUMNMODE :
 		{
@@ -1273,7 +1278,7 @@ void Notepad_plus::command(int id)
 			if (isFirstTime)
 				_nativeLangSpeaker.changeDlgLang(_colEditorDlg.getHSelf(), "ColumnEditor");
 		}
-		break;
+			break;
 
 		case IDM_SEARCH_GOTOMATCHINGBRACE :
 		case IDM_SEARCH_SELECTMATCHINGBRACES :
@@ -1284,13 +1289,13 @@ void Notepad_plus::command(int id)
 
 			if (braceOpposite != -1)
 			{
-				if (id == IDM_SEARCH_GOTOMATCHINGBRACE)
+				if(id == IDM_SEARCH_GOTOMATCHINGBRACE)
 					_pEditView->execute(SCI_GOTOPOS, braceOpposite);
 				else
 					_pEditView->execute(SCI_SETSEL, min(braceAtCaret, braceOpposite), max(braceAtCaret, braceOpposite) + 1); // + 1 so we always include the ending brace in the selection.
 			}
 		}
-		break;
+			break;
 
         case IDM_SEARCH_TOGGLE_BOOKMARK :
 	        bookmarkToggle(-1);
@@ -1376,7 +1381,7 @@ void Notepad_plus::command(int id)
 			checkMenuItem(IDM_LANG_USER_DLG, !isUDDlgVisible);
 			_toolBar.setCheck(IDM_LANG_USER_DLG, !isUDDlgVisible);
         }
-		break;
+            break;
 
 		case IDM_EDIT_SELECTALL:
 			_pEditView->execute(SCI_SELECTALL);
@@ -2521,14 +2526,14 @@ void Notepad_plus::command(int id)
 
             // Tell users to restart Notepad++ to load plugin
 			if (copiedFiles.size())
-			{
+            {
 				NativeLangSpeaker *pNativeSpeaker = (NppParameters::getInstance())->getNativeLangSpeaker();
 				pNativeSpeaker->messageBox("NeedToRestartToLoadPlugins",
 					NULL,
 					TEXT("You have to restart Notepad++ to load plugins you installed."),
 					TEXT("Notepad++ need to be relaunched"),
 					MB_OK | MB_APPLMODAL);
-			}
+            }
             break;
         }
 
@@ -2910,25 +2915,25 @@ void Notepad_plus::command(int id)
 #endif
 				if (isCertifVerified)
 				{
-					generic_string param;
-					if (id == IDM_CONFUPDATERPROXY)
-					{
-						param = TEXT("-options");
-					}
-					else
-					{
-						param = TEXT("-verbose -v");
-						param += VERSION_VALUE;
-
-						if (NppParameters::getInstance()->isx64())
-						{
-							param += TEXT(" -px64");
-						}
-					}
-					Process updater(updaterFullPath.c_str(), param.c_str(), updaterDir.c_str());
-
-					updater.run();
+				generic_string param;
+				if (id == IDM_CONFUPDATERPROXY)
+				{
+					param = TEXT("-options");
 				}
+				else
+				{
+					param = TEXT("-verbose -v");
+					param += VERSION_VALUE;
+
+					if (NppParameters::getInstance()->isx64())
+					{
+						param += TEXT(" -px64");
+					}
+				}
+				Process updater(updaterFullPath.c_str(), param.c_str(), updaterDir.c_str());
+
+				updater.run();
+			}
 			}
 			break;
 		}
