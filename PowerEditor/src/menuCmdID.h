@@ -236,6 +236,7 @@
     #define    IDM_SEARCH_STYLE5TOCLIP         (IDM_SEARCH + 59)
     #define    IDM_SEARCH_ALLSTYLESTOCLIP      (IDM_SEARCH + 60)
     #define    IDM_SEARCH_MARKEDTOCLIP         (IDM_SEARCH + 61)
+	#define    IDM_TOGGLE_FOUND_RESULTS        (IDM_SEARCH + 62)
 
     #define    IDM_SEARCH_MARKONEEXT1          (IDM_SEARCH + 62)
     #define    IDM_SEARCH_MARKONEEXT2          (IDM_SEARCH + 63)
