@@ -21,6 +21,7 @@
 #include <cinttypes>
 #include "PluginsManager.h"
 #include "resource.h"
+#include "tchar.h"
 
 using namespace std;
 
@@ -145,7 +146,16 @@ int PluginsManager::loadPlugin(const TCHAR *pluginFilePath)
 		pi->_pFuncGetName = (PFUNCGETNAME)GetProcAddress(pi->_hLib, "getName");
 		if (!pi->_pFuncGetName)
 			throw generic_string(TEXT("Missing \"getName\" function"));
-		pi->_funcName = pi->_pFuncGetName();
+
+		const auto original_name = pi->_pFuncGetName();
+		if ( original_name[0]!= _TEXT('&')) {
+			pi->_funcName = generic_string{ '&' };
+			pi->_funcName.append(original_name);
+		}
+		else {
+			pi->_funcName = original_name;
+		}
+		
 
 		pi->_pBeNotified = (PBENOTIFIED)GetProcAddress(pi->_hLib, "beNotified");
 		if (!pi->_pBeNotified)
