@@ -1,6 +1,8 @@
 @ECHO OFF
 :: Perform the pre-steps to build boost and set the boost path for the build file
 SETLOCAL
+rem SET BOOSTPATH=F:\boost\32bit\boost_1_63_0-msvc-14.0-32
+rem SET MSVCTOOLSET=msvc-14.0
 SET BOOSTPATH=
 SET MSVCTOOLSET=
 SET TOOLSETCOMMAND=
@@ -19,16 +21,21 @@ IF NOT [%1]==[--toolset] (
      SET BOOSTPATH=%1
 )
 
+
+
+rem BuildBoost.bat --toolset msvc-14.0 F:\boost\32bit\boost_1_63_0-msvc-14.0-32
 IF [%1]==[--toolset] (
   SET MSVCTOOLSET=%2
-  SHIFT
+  SET BOOSTPATH=%3
+  SET ARCH=%4
+  REM The SHIFT command will not work within parenthesis/brackets
+  REM SHIFT 
 )
 
-IF [%2]==[-x64] (
+IF [%ARCH%]==[-x64] (
 	SET BUILDTARGETPARAM=architecture=ia64
 	SET BUILDTARGETPATH=architecture-ia64\
 )
-
 rem SHIFT
 rem GOTO PARAMLOOP
 :PARAMCONTINUE
@@ -50,18 +57,27 @@ IF NOT EXIST "%BOOSTPATH%\boost\regex.hpp" (
    GOTO BOOSTNOTFOUND
 )
 
-IF NOT EXIST "%BOOSTPATH%\bjam\bin\bjam.exe" (
+set BJAM_BIN_RELATIVE_PATH=\bjam\bin
+IF NOT EXIST "%BOOSTPATH%\%BJAM_BIN_RELATIVE_PATH%" set BJAM_BIN_RELATIVE_PATH=
+
+set B2EXE_BIN_RELATIVE_PATH=\tools\build\v2
+IF NOT EXIST "%BOOSTPATH%\%B2EXE_BIN_RELATIVE_PATH%" set B2EXE_BIN_RELATIVE_PATH=
+
+IF NOT EXIST "%BOOSTPATH%%BJAM_BIN_RELATIVE_PATH%\bjam.exe" (
 	ECHO Building BJAM, the boost build tool
-	PUSHD %BOOSTPATH%\tools\build\v2
+	PUSHD %BOOSTPATH%%B2EXE_BIN_RELATIVE_PATH%
 	CALL bootstrap.bat
 
-	%BOOSTPATH%\tools\build\v2\b2 --prefix=%BOOSTPATH%\bjam install
+	%BOOSTPATH%%B2EXE_BIN_RELATIVE_PATH%\b2.exe --prefix=%BOOSTPATH%\bjam install
 	POPD
 )
 
 IF NOT ERRORLEVEL 0 (
 	GOTO BUILDERROR
 )
+
+pause
+
 ECHO.
 ECHO ***************************************************************
 ECHO Building tool to check boost version
@@ -110,12 +126,12 @@ ECHO.
 
 PUSHD %BOOSTPATH%\libs\regex\build
 
-%BOOSTPATH%\bjam\bin\bjam %TOOLSETCOMMAND% variant=release threading=multi link=static runtime-link=static %BUILDTARGETPARAM%
+%BOOSTPATH%%BJAM_BIN_RELATIVE_PATH%\bjam %TOOLSETCOMMAND% variant=release threading=multi link=static runtime-link=static %BUILDTARGETPARAM%
 IF NOT ERRORLEVEL 0 (
 	GOTO BUILDERROR
 )
 
-%BOOSTPATH%\bjam\bin\bjam %TOOLSETCOMMAND% variant=debug threading=multi link=static runtime-link=static %BUILDTARGETPARAM%
+%BOOSTPATH%%BJAM_BIN_RELATIVE_PATH%\bjam %TOOLSETCOMMAND% variant=debug threading=multi link=static runtime-link=static %BUILDTARGETPARAM%
 IF NOT ERRORLEVEL 0 (
 	GOTO BUILDERROR
 )
@@ -123,6 +139,12 @@ IF NOT ERRORLEVEL 0 (
 IF NOT [%MSVCTOOLSET%]==[] (
     GOTO TOOLSETKNOWN
 )
+
+:: VS2015
+IF EXIST %BOOSTPATH%\bin.v2\libs\regex\build\msvc-14.0\release\%BUILDTARGETPATH%link-static\runtime-link-static\threading-multi\libboost_regex-vc140-mt-s-%BOOSTVERSION%.lib (
+	SET MSVCTOOLSET=msvc-14.0
+)
+
 
 :: VS2013
 IF EXIST %BOOSTPATH%\bin.v2\libs\regex\build\msvc-12.0\release\%BUILDTARGETPATH%link-static\runtime-link-static\threading-multi\libboost_regex-vc120-mt-s-%BOOSTVERSION%.lib (
@@ -162,6 +184,11 @@ ECHO Run buildboost.bat without parameters to see the usage.
 
 
 :TOOLSETKNOWN
+
+:: VS2015
+IF [%MSVCTOOLSET%]==[msvc-14.0] (
+	SET BOOSTLIBPATH=%BOOSTPATH%\bin.v2\libs\regex\build\msvc-14.0
+)
 
 :: VS2013
 IF [%MSVCTOOLSET%]==[msvc-12.0] (
