@@ -158,7 +158,8 @@ int PluginsManager::loadPlugin(const TCHAR *pluginFilePath)
 		pi->_pFuncGetName = (PFUNCGETNAME)GetProcAddress(pi->_hLib, "getName");
 		if (!pi->_pFuncGetName)
 			throw generic_string(TEXT("Missing \"getName\" function"));
-		pi->_funcName = pi->_pFuncGetName();
+		pi->_funcName = generic_string{ '&' };
+		pi->_funcName.append(pi->_pFuncGetName());
 
 		pi->_pBeNotified = (PBENOTIFIED)GetProcAddress(pi->_hLib, "beNotified");
 		if (!pi->_pBeNotified)
@@ -498,11 +499,11 @@ HMENU PluginsManager::setMenu(HMENU hMenu, const TCHAR *menuName, bool enablePlu
 
 		if (enablePluginAdmin)
 		{
-			::InsertMenu(_hPluginsMenu, i++, MF_BYPOSITION, IDM_SETTING_PLUGINADM, TEXT("Plugins Admin..."));
+			::InsertMenu(_hPluginsMenu, i++, MF_BYPOSITION, IDM_SETTING_PLUGINADM, TEXT("Plugins &Admin..."));
 			::InsertMenu(_hPluginsMenu, i++, MF_BYPOSITION | MF_SEPARATOR, 0, TEXT(""));
 		}
 
-		::InsertMenu(_hPluginsMenu, i, MF_BYPOSITION, IDM_SETTING_OPENPLUGINSDIR, TEXT("Open Plugins Folder..."));
+		::InsertMenu(_hPluginsMenu, i, MF_BYPOSITION, IDM_SETTING_OPENPLUGINSDIR, TEXT("Open Plugins &Folder..."));
 	}
 
 	for (size_t i = 0; i < nbPlugin; ++i)
