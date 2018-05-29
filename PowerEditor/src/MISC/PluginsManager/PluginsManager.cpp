@@ -151,7 +151,9 @@ int PluginsManager::loadPlugin(const TCHAR *pluginFilePath, vector<generic_strin
 		pi->_pFuncGetName = (PFUNCGETNAME)GetProcAddress(pi->_hLib, "getName");
 		if (!pi->_pFuncGetName)
 			throw generic_string(TEXT("Missing \"getName\" function"));
-		pi->_funcName = pi->_pFuncGetName();
+		pi->_funcName = generic_string{ '&' };
+		pi->_funcName.append(pi->_pFuncGetName());
+
 
 		pi->_pBeNotified = (PBENOTIFIED)GetProcAddress(pi->_hLib, "beNotified");
 		if (!pi->_pBeNotified)

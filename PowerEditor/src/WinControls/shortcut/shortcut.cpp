@@ -505,7 +505,8 @@ void Accelerator::updateShortcuts()
 			_pAccelArray[offset].key = shortcuts[i].getKeyCombo()._key;
 
 			// Special extra handling for shortcuts shared by Incremental Find dialog
-			if (std::find(incrFindAccIds.begin(), incrFindAccIds.end(), shortcuts[i].getID()) != incrFindAccIds.end())
+                        const auto find_matched_shoutcutID = [&](auto id) { return static_cast<unsigned long>(id) == shortcuts[i].getID(); };
+                        if (std::find_if(incrFindAccIds.begin(), incrFindAccIds.end(), find_matched_shoutcutID) != incrFindAccIds.end())
 				incrFindAcc.push_back(_pAccelArray[offset]);
 
 			if (shortcuts[i].getID() == IDM_SEARCH_FIND)

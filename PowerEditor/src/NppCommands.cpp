@@ -1075,13 +1075,18 @@ void Notepad_plus::command(int id)
 
 		case IDM_FOCUS_ON_FOUND_RESULTS:
 		{
-			if (GetFocus() == _findReplaceDlg.getHFindResults())
-				// focus already on found results, switch to current edit view
+			// toggle display of finder
+			if(_findReplaceDlg.isFinderVisible())
+			{
+				_findReplaceDlg.hideFinder();
 				switchEditViewTo(currentView());
+			}
 			else
+			{
 				_findReplaceDlg.focusOnFinder();
 		}
 		break;
+ 		}
 
 		case IDM_SEARCH_VOLATILE_FINDNEXT :
 		case IDM_SEARCH_VOLATILE_FINDPREV :
@@ -2599,36 +2604,6 @@ void Notepad_plus::command(int id)
 			if (textLen > maxSelLen)
 				doAboutDlg = true;
 
-			if (!doAboutDlg)
-			{
-				char author[maxSelLen+1] = "";
-				_pEditView->getSelectedText(author, maxSelLen + 1);
-				WcharMbcsConvertor *wmc = WcharMbcsConvertor::getInstance();
-				const wchar_t * authorW = wmc->char2wchar(author, _nativeLangSpeaker.getLangEncoding());
-				int iQuote = getQuoteIndexFrom(authorW);
-
-				if (iQuote == -1)
-				{
-					doAboutDlg = true;
-				}
-				else if (iQuote == -2)
-				{
-					generic_string noEasterEggsPath((NppParameters::getInstance())->getNppPath());
-					noEasterEggsPath.append(TEXT("\\noEasterEggs.xml"));
-					if (!::PathFileExists(noEasterEggsPath.c_str()))
-						showAllQuotes();
-					return;
-				}
-				if (iQuote != -1)
-				{
-					generic_string noEasterEggsPath((NppParameters::getInstance())->getNppPath());
-					noEasterEggsPath.append(TEXT("\\noEasterEggs.xml"));
-					if (!::PathFileExists(noEasterEggsPath.c_str()))
-						showQuoteFromIndex(iQuote);
-					return;
-				}
-			}
-
 			if (doAboutDlg)
 			{
 				bool isFirstTime = !_aboutDlg.isCreated();
@@ -2637,7 +2612,7 @@ void Notepad_plus::command(int id)
 				{
 					if (_nativeLangSpeaker.getLangEncoding() == NPP_CP_BIG5)
 					{
-						char *authorName = "«J¤µ§^";
+						char *authorName = "«J¤µ§^"; //侯今吾
 						HWND hItem = ::GetDlgItem(_aboutDlg.getHSelf(), IDC_AUTHOR_NAME);
 
 						WcharMbcsConvertor *wmc = WcharMbcsConvertor::getInstance();

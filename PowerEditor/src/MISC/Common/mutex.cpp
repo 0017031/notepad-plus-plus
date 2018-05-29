@@ -9,7 +9,7 @@
 // copyrights intact :
 //  * If you distribute electronically, the source can be a separate download
 //    (either from your own site if you modified YUNI, or to the official YUNI
-//    website if you used an unmodified version) – just include a link in your
+//    website if you used an unmodified version) - just include a link in your
 //    documentation
 //  * If you distribute physical media, the YUNI source that you used to build
 //    your application should be included on that media

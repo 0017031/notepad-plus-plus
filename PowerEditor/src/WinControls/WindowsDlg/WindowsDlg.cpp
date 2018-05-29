@@ -774,7 +774,7 @@ void WindowsDlg::doClose()
 						--(*itr);
 			}
 		}
-		_idxMap.erase(std::remove_if(_idxMap.begin(), _idxMap.end(), bind2nd(equal_to<int>(), -1)), _idxMap.end());
+		_idxMap.erase(std::remove_if(_idxMap.begin(), _idxMap.end(), [](auto &x) {return x == -1; }), _idxMap.end());
 	}
 	delete[] nmdlg.Items;
 
