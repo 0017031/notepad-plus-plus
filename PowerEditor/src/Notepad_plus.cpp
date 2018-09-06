@@ -235,7 +235,7 @@ LRESULT Notepad_plus::init(HWND hwnd)
 
 	int tabBarStatus = nppGUI._tabStatus;
 	_toReduceTabBar = ((tabBarStatus & TAB_REDUCE) != 0);
-	int iconDpiDynamicalSize = NppParameters::getInstance()->_dpiManager.scaleY(_toReduceTabBar?13:20);
+	int iconDpiDynamicalSize = pNppParam->_dpiManager.scaleY(_toReduceTabBar?13:20);
 	_docTabIconList.create(iconDpiDynamicalSize, _pPublicInterface->getHinst(), docTabIconIDs, sizeof(docTabIconIDs)/sizeof(int));
 
 	_mainDocTab.init(_pPublicInterface->getHinst(), hwnd, &_mainEditView, &_docTabIconList);
@@ -345,8 +345,8 @@ LRESULT Notepad_plus::init(HWND hwnd)
 			::SendMessage(_mainDocTab.getHSelf(), WM_SETFONT, reinterpret_cast<WPARAM>(hf), MAKELPARAM(TRUE, 0));
 			::SendMessage(_subDocTab.getHSelf(), WM_SETFONT, reinterpret_cast<WPARAM>(hf), MAKELPARAM(TRUE, 0));
 		}
-		int tabDpiDynamicalHeight = NppParameters::getInstance()->_dpiManager.scaleY(22);
-		int tabDpiDynamicalWidth = NppParameters::getInstance()->_dpiManager.scaleX(45);
+		int tabDpiDynamicalHeight = pNppParam->_dpiManager.scaleY(22);
+		int tabDpiDynamicalWidth = pNppParam->_dpiManager.scaleX(45);
 		TabCtrl_SetItemSize(_mainDocTab.getHSelf(), tabDpiDynamicalWidth, tabDpiDynamicalHeight);
 		TabCtrl_SetItemSize(_subDocTab.getHSelf(), tabDpiDynamicalWidth, tabDpiDynamicalHeight);
 	}
@@ -370,11 +370,11 @@ LRESULT Notepad_plus::init(HWND hwnd)
     //--Status Bar Section--//
 	bool willBeShown = nppGUI._statusBarShow;
     _statusBar.init(_pPublicInterface->getHinst(), hwnd, 6);
-	_statusBar.setPartWidth(STATUSBAR_DOC_SIZE, NppParameters::getInstance()->_dpiManager.scaleX(200));
-	_statusBar.setPartWidth(STATUSBAR_CUR_POS, NppParameters::getInstance()->_dpiManager.scaleX(260));
-	_statusBar.setPartWidth(STATUSBAR_EOF_FORMAT, NppParameters::getInstance()->_dpiManager.scaleX(110));
-	_statusBar.setPartWidth(STATUSBAR_UNICODE_TYPE, NppParameters::getInstance()->_dpiManager.scaleX(120));
-	_statusBar.setPartWidth(STATUSBAR_TYPING_MODE, NppParameters::getInstance()->_dpiManager.scaleX(30));
+	_statusBar.setPartWidth(STATUSBAR_DOC_SIZE, pNppParam->_dpiManager.scaleX(200));
+	_statusBar.setPartWidth(STATUSBAR_CUR_POS, pNppParam->_dpiManager.scaleX(260));
+	_statusBar.setPartWidth(STATUSBAR_EOF_FORMAT, pNppParam->_dpiManager.scaleX(110));
+	_statusBar.setPartWidth(STATUSBAR_UNICODE_TYPE, pNppParam->_dpiManager.scaleX(120));
+	_statusBar.setPartWidth(STATUSBAR_TYPING_MODE, pNppParam->_dpiManager.scaleX(30));
     _statusBar.display(willBeShown);
 
     _pMainWindow = &_mainDocTab;
@@ -398,26 +398,26 @@ LRESULT Notepad_plus::init(HWND hwnd)
 	_scintillaCtrls4Plugins.init(_pPublicInterface->getHinst(), hwnd);
 	_pluginsManager.init(nppData);
 
-	// If Notepad++ is not in localConf mode, load plugins firstly from "%APPDATA%/Notepad++/plugins"
+	// If Notepad++ is not in localConf mode, load plugins firstly from "%APPDATA%/Local/Notepad++/plugins"
 	// All the dll loaded are marked.
-	bool isLoadFromAppDataAllow = ::SendMessage(_pPublicInterface->getHSelf(), NPPM_GETAPPDATAPLUGINSALLOWED, 0, 0) == TRUE;
-
-	const TCHAR *appDataNpp = pNppParam->getAppDataNppDir();
-	if (appDataNpp[0] && isLoadFromAppDataAllow)
-		_pluginsManager.loadPlugins(appDataNpp);
-
 	generic_string localAppDataNppPluginsDir = pNppParam->getLocalAppDataNppDir();
-	if (!localAppDataNppPluginsDir.empty() && isLoadFromAppDataAllow)
+	if (!localAppDataNppPluginsDir.empty() && !pNppParam->isLocal())
 	{
 		PathAppend(localAppDataNppPluginsDir, TEXT("plugins"));
 		_pluginsManager.loadPluginsV2(localAppDataNppPluginsDir.c_str());
 	}
 
+	// obsolet
+	bool isLoadFromAppDataAllow = ::SendMessage(_pPublicInterface->getHSelf(), NPPM_GETAPPDATAPLUGINSALLOWED, 0, 0) == TRUE;
+	const TCHAR *appDataNpp = pNppParam->getAppDataNppDir();
+	if (appDataNpp[0] && isLoadFromAppDataAllow)
+		_pluginsManager.loadPlugins(appDataNpp);
+
+
 	// Load plugins from its installation directory.
 	// All loaded dll will be ignored
-	_pluginsManager.loadPlugins();
 	_pluginsManager.loadPluginsV2();
-
+	_pluginsManager.loadPlugins(); // obsolet
 
     _restoreButton.init(_pPublicInterface->getHinst(), hwnd);
 
@@ -536,7 +536,10 @@ LRESULT Notepad_plus::init(HWND hwnd)
 	}
 
 	//Plugin menu
-	_pluginsManager.setMenu(_mainMenuHandle, NULL);
+	bool enablePluginAdmin = _pluginsAdminDlg.isValide();
+	_pluginsAdminDlg.setPluginsManager(&_pluginsManager);
+	_pluginsManager.setMenu(_mainMenuHandle, NULL, enablePluginAdmin);
+
 
 	//Main menu is loaded, now load context menu items
 	pNppParam->getContextMenuFromXmlTree(_mainMenuHandle, _pluginsManager.getMenuHandle());
@@ -688,13 +691,13 @@ LRESULT Notepad_plus::init(HWND hwnd)
 	// Initialize the default foreground & background color
 	//
 	{
-		StyleArray & globalStyles = (NppParameters::getInstance())->getGlobalStylers();
+		StyleArray & globalStyles = pNppParam->getGlobalStylers();
 		int i = globalStyles.getStylerIndexByID(STYLE_DEFAULT);
 		if (i != -1)
 		{
 			Style & style = globalStyles.getStyler(i);
-			(NppParameters::getInstance())->setCurrentDefaultFgColor(style._fgColor);
-			(NppParameters::getInstance())->setCurrentDefaultBgColor(style._bgColor);
+			pNppParam->setCurrentDefaultFgColor(style._fgColor);
+			pNppParam->setCurrentDefaultBgColor(style._bgColor);
 		}
 	}
 
@@ -2592,7 +2595,7 @@ void Notepad_plus::maintainIndentation(TCHAR ch)
 			{
 				if (nextChar == '}')
 				{
-					char *eolChars;
+					const char *eolChars;
 					if (eolMode == SC_EOL_CRLF)
 						eolChars = "\r\n";
 					else if (eolMode == SC_EOL_LF)
@@ -4952,7 +4955,7 @@ void Notepad_plus::getCurrentOpenedFiles(Session & session, bool includUntitledD
 
 			generic_string	languageName = getLangFromMenu(buf);
 			const TCHAR *langName = languageName.c_str();
-			sessionFileInfo sfi(buf->getFullPathName(), langName, buf->getEncoding(), buf->getPosition(editView), buf->getBackupFileName().c_str(), int(buf->getLastModifiedTimestamp()), buf->getMapPosition());
+			sessionFileInfo sfi(buf->getFullPathName(), langName, buf->getEncoding(), buf->getPosition(editView), buf->getBackupFileName().c_str(), buf->getLastModifiedTimestamp(), buf->getMapPosition());
 
 			_invisibleEditView.execute(SCI_SETDOCPOINTER, 0, buf->getDocument());
 			size_t maxLine = static_cast<size_t>(_invisibleEditView.execute(SCI_GETLINECOUNT));
@@ -5288,7 +5291,7 @@ void Notepad_plus::notifyBufferActivated(BufferID bufid, int view)
 	_linkTriggered = true;
 }
 
-void Notepad_plus::loadCommandlineParams(const TCHAR * commandLine, CmdLineParams * pCmdParams)
+void Notepad_plus::loadCommandlineParams(const TCHAR * commandLine, const CmdLineParamsDTO * pCmdParams)
 {
 	if (!commandLine || ! pCmdParams)
 		return;
@@ -6312,6 +6315,5 @@ bool Notepad_plus::undoStreamComment(bool tryBlockComment)
 		}
 	}
 	while(1); //do as long as stream-comments are within selection
-	//return retVal;
 }
 

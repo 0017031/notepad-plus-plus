@@ -1,28 +1,10 @@
-Notepad++ v7.5.6 enhancements & bug-fixes:
+Notepad++ v7.5.8 bug-fixes:
 
-1.  Fix macro playing back crash issue on new added "find previous" and "find next" buttons.
-2.  Function List enhancement: Highlight the current function based on cursor position.
-3.  Fix crash on styler dialog of User Defined Language dialog.
-4.  Fix file status detection issue under Windows XP.
-5.  Ghost typing enhancement: Unicode, syntax highlighting and speed support.
-    (check the url for the usage of ghost typing on command line: https://notepad-plus-plus.org/features/ghost-typing.html )
-6.  Add a message from outer space.
-
-
-Notepad++ 7.5.5 enhancements & bug-fixes:
-
-1.  Restore 2 buttons "<< Find Previous" & "Find Next >>" in Find dialog (optional).
-2.  Fix monitored (tail -f) file not always updated issue.
-3.  Keep Doc Switcher's ordering in sync with Tab bar.
-4.  Shortcut Mapper enhancements: Add filter capacity and make dialog resizable and maximizable.
-5.  Fix for "Toggle Single Line Comment" malfunctioning with HTML/XML.
-6.  Make Unix style path (slashes) work in open file dialog (optional).
-7.  Fix tab sticks to mouse pointer problem after external update of a opened file.
-8.  Fix encoding not sync (on status bar) after reloading.
-9.  Fix menu items' state is not maintained due to save macro command.
-10. Fix line ending changes are not detected in reloaded changed files issue.
-11. Fix highlighting of <script> tags in XML files issue.
-12. Fix Unicode file name comparison to match Windows behaviour (as opposed to doing a linguistic filename comparison).
+1.  Remove annoying "no update" notification.
+2.  Fix Folder as Workspace not updating regression.
+3.  Fixed crash issue by checking & unchecking "Disable extension column" option in preferences dialog.
+4.  Fixed a crash when trying to launch a secondary instance with command line arguments.
+5.  Fix "Explorer Here" from "Folder as Workspace" problem if folder name contains comma.
 
 
 Included plugins:
@@ -35,4 +17,4 @@ Included plugins:
 
 Updater (Installer only):
 
-* WinGup v4.2
+* WinGup (for Notepad++) v5.0.2
