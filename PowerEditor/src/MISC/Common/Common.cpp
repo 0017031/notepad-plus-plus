@@ -31,6 +31,9 @@
 #include <uxtheme.h>
 #include <locale>
 #include <cassert>
+#include <codecvt>
+#include <locale>
+
 #include "StaticDialog.h"
 
 #include "Common.h"
@@ -62,6 +65,9 @@ generic_string commafyInt(size_t n)
 
 std::string getFileContent(const TCHAR *file2read)
 {
+	if (!::PathFileExists(file2read))
+		return "";
+
 	const size_t blockSize = 1024;
 	char data[blockSize];
 	std::string wholeFileContent = "";
@@ -70,22 +76,15 @@ std::string getFileContent(const TCHAR *file2read)
 	size_t lenFile = 0;
 	do
 	{
-		lenFile = fread(data, 1, blockSize - 1, fp);
+		lenFile = fread(data, 1, blockSize, fp);
 		if (lenFile <= 0) break;
-
-		if (lenFile >= blockSize - 1)
-			data[blockSize - 1] = '\0';
-		else
-			data[lenFile] = '\0';
-
-		wholeFileContent += data;
+		wholeFileContent.append(data, lenFile);
 	}
 	while (lenFile > 0);
 
 	fclose(fp);
 	return wholeFileContent;
 }
-
 
 char getDriveLetter()
 {
@@ -954,7 +953,6 @@ bool str2Clipboard(const generic_string &str2cpy, HWND hwnd)
 	unsigned int clipBoardFormat = CF_UNICODETEXT;
 	if (::SetClipboardData(clipBoardFormat, hglbCopy) == NULL)
 	{
-		::GlobalUnlock(hglbCopy);
 		::GlobalFree(hglbCopy);
 		::CloseClipboard();
 		return false;
@@ -1194,4 +1192,44 @@ bool isAssoCommandExisting(LPCTSTR FullPathName)
         
 	}
 	return isAssoCommandExisting;
+}
+
+std::wstring s2ws(const std::string& str)
+{
+	using convert_typeX = std::codecvt_utf8<wchar_t>;
+	std::wstring_convert<convert_typeX, wchar_t> converterX;
+
+	return converterX.from_bytes(str);
+}
+
+std::string ws2s(const std::wstring& wstr)
+{
+	using convert_typeX = std::codecvt_utf8<wchar_t>;
+	std::wstring_convert<convert_typeX, wchar_t> converterX;
+
+	return converterX.to_bytes(wstr);
+}
+
+bool deleteFileOrFolder(const generic_string& f2delete)
+{
+	auto len = f2delete.length();
+	TCHAR* actionFolder = new TCHAR[len + 2];
+	lstrcpy(actionFolder, f2delete.c_str());
+	actionFolder[len] = 0;
+	actionFolder[len + 1] = 0;
+
+	SHFILEOPSTRUCT fileOpStruct = { 0 };
+	fileOpStruct.hwnd = NULL;
+	fileOpStruct.pFrom = actionFolder;
+	fileOpStruct.pTo = NULL;
+	fileOpStruct.wFunc = FO_DELETE;
+	fileOpStruct.fFlags = FOF_NOCONFIRMATION | FOF_SILENT | FOF_ALLOWUNDO;
+	fileOpStruct.fAnyOperationsAborted = false;
+	fileOpStruct.hNameMappings = NULL;
+	fileOpStruct.lpszProgressTitle = NULL;
+
+	int res = SHFileOperation(&fileOpStruct);
+
+	delete[] actionFolder;
+	return (res == 0);
 }

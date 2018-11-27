@@ -215,6 +215,7 @@ public:
 	bool replaceInFiles();
 	void setFindReplaceFolderFilter(const TCHAR *dir, const TCHAR *filters);
 	std::vector<generic_string> addNppComponents(const TCHAR *destDir, const TCHAR *extFilterName, const TCHAR *extFilter);
+	std::vector<generic_string> addNppPlugins(const TCHAR *extFilterName, const TCHAR *extFilter);
     int getHtmlXmlEncoding(const TCHAR *fileName) const;
 	HACCEL getAccTable() const{
 		return _accelerator.getAccTable();
@@ -586,6 +587,8 @@ private:
 		Buffer *_buffer = nullptr;
 		HWND _nppHandle = nullptr;
 	};
+
+	void monitoringStartOrStopAndUpdateUI(Buffer* pBuf, bool isStarting);
 };
 
 

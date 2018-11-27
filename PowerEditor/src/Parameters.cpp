@@ -997,6 +997,11 @@ bool NppParameters::load()
 	// Test if localConf.xml exist
 	_isLocal = (PathFileExists(localConfPath.c_str()) == TRUE);
 
+	generic_string pluginsForAllUserPath(_nppPath);
+	PathAppend(pluginsForAllUserPath, pluginsForAllUsersFile);
+	if (!PathFileExists(pluginsForAllUserPath.c_str()))
+		pluginsForAllUserPath = TEXT("");
+
 	// Under vista and windows 7, the usage of doLocalConf.xml is not allowed
 	// if Notepad++ is installed in "program files" directory, because of UAC
 	if (_isLocal)
@@ -1014,9 +1019,13 @@ bool NppParameters::load()
 		}
 	}
 
+	generic_string nppPluginRootParent;
 	if (_isLocal)
 	{
-		_userPath = _nppPath;
+		_userPath = nppPluginRootParent = _nppPath;
+
+		_pluginRootDir = _nppPath;
+		PathAppend(_pluginRootDir, TEXT("plugins"));
 	}
 	else
 	{
@@ -1025,18 +1034,35 @@ bool NppParameters::load()
 		PathAppend(_userPath, TEXT("Notepad++"));
 		_appdataNppDir = _userPath;
 
-		// Plugin System V1
 		if (!PathFileExists(_userPath.c_str()))
 			::CreateDirectory(_userPath.c_str(), NULL);
 
-		// Plugin System V2
 		_localAppdataNppDir = getSpecialFolderLocation(CSIDL_LOCAL_APPDATA);
 		PathAppend(_localAppdataNppDir, TEXT("Notepad++"));
-		if (!PathFileExists(_localAppdataNppDir.c_str()))
-			::CreateDirectory(_localAppdataNppDir.c_str(), NULL);
-	}
-	
+		nppPluginRootParent = _localAppdataNppDir;
 
+		_pluginRootDir = _localAppdataNppDir;
+		PathAppend(_pluginRootDir, TEXT("plugins"));
+	}
+
+	// pluginsForAllUser.xml > doLocalConf.xml
+	// overriding _pluginRootDir
+	if (!pluginsForAllUserPath.empty())
+	{
+		_pluginRootDir = getSpecialFolderLocation(CSIDL_COMMON_APPDATA);
+		PathAppend(_pluginRootDir, TEXT("Notepad++"));
+		nppPluginRootParent = _pluginRootDir;
+
+		PathAppend(_pluginRootDir, TEXT("plugins"));
+
+		// For PluginAdmin to launch the wingup with UAC
+		setElevationRequired(true);
+	}
+
+	if (!PathFileExists(nppPluginRootParent.c_str()))
+		::CreateDirectory(nppPluginRootParent.c_str(), NULL);
+	if (!PathFileExists(_pluginRootDir.c_str()))
+		::CreateDirectory(_pluginRootDir.c_str(), NULL);
 
 	_sessionPath = _userPath; // Session stock the absolute file path, it should never be on cloud
 
@@ -2003,8 +2029,8 @@ bool NppParameters::getSessionFromXmlTree(TiXmlDocument *pSessionDoc, Session *p
 		return false;
 
 	TiXmlElement *actView = sessionRoot->ToElement();
-	size_t index;
-	const TCHAR *str = actView->Attribute(TEXT("activeView"), reinterpret_cast<int *>(&index));
+	int index = 0;
+	const TCHAR *str = actView->Attribute(TEXT("activeView"), &index);
 	if (str)
 	{
 		(*ptrSession)._activeView = index;
@@ -2018,9 +2044,9 @@ bool NppParameters::getSessionFromXmlTree(TiXmlDocument *pSessionDoc, Session *p
 	{
 		if (viewRoots[k])
 		{
-			size_t index2;
+			int index2 = 0;
 			TiXmlElement *actIndex = viewRoots[k]->ToElement();
-			str = actIndex->Attribute(TEXT("activeIndex"), reinterpret_cast<int *>(&index2));
+			str = actIndex->Attribute(TEXT("activeIndex"), &index2);
 			if (str)
 			{
 				if (k == 0)
@@ -6618,7 +6644,9 @@ Date::Date(const TCHAR *dateStr)
 {
 	// timeStr should be Notepad++ date format : YYYYMMDD
 	assert(dateStr);
-	if (lstrlen(dateStr) == 8)
+	int D = lstrlen(dateStr);
+
+	if ( 8==D )
 	{
 		generic_string ds(dateStr);
 		generic_string yyyy(ds, 0, 4);

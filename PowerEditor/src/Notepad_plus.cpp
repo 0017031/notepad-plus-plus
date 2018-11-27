@@ -398,29 +398,8 @@ LRESULT Notepad_plus::init(HWND hwnd)
 	_scintillaCtrls4Plugins.init(_pPublicInterface->getHinst(), hwnd);
 	_pluginsManager.init(nppData);
 
-	// If Notepad++ is not in localConf mode, load plugins firstly from "%APPDATA%/Local/Notepad++/plugins"
-	// All the dll loaded are marked.
-	generic_string localAppDataNppPluginsDir = pNppParam->getLocalAppDataNppDir();
-	if (!localAppDataNppPluginsDir.empty() && !pNppParam->isLocal())
-	{
-		PathAppend(localAppDataNppPluginsDir, TEXT("plugins"));
-		_pluginsManager.loadPluginsV2(localAppDataNppPluginsDir.c_str());
-	}
-
-	// obsolet
-	bool isLoadFromAppDataAllow = ::SendMessage(_pPublicInterface->getHSelf(), NPPM_GETAPPDATAPLUGINSALLOWED, 0, 0) == TRUE;
-	const TCHAR *appDataNpp = pNppParam->getAppDataNppDir();
-	if (appDataNpp[0] && isLoadFromAppDataAllow)
-		_pluginsManager.loadPlugins(appDataNpp);
-
-
-	// Load plugins from its installation directory.
-	// All loaded dll will be ignored
-	_pluginsManager.loadPluginsV2();
-	_pluginsManager.loadPlugins(); // obsolet
-
+	_pluginsManager.loadPluginsV2(pNppParam->getPluginRootDir());
     _restoreButton.init(_pPublicInterface->getHinst(), hwnd);
-
 
 	// ------------ //
 	// Menu Section //
@@ -1479,6 +1458,8 @@ void Notepad_plus::getMatchedFileNames(const TCHAR *dir, const vector<generic_st
 
 bool Notepad_plus::replaceInFiles()
 {
+	LongRunningOperation op;
+
 	const TCHAR *dir2Search = _findReplaceDlg.getDir2Search();
 	if (!dir2Search[0] || !::PathFileExists(dir2Search))
 	{
@@ -2569,6 +2550,11 @@ void Notepad_plus::maintainIndentation(TCHAR ch)
 
 	LangType type = _pEditView->getCurrentBuffer()->getLangType();
 
+	// Do not alter indentation if we were at the beginning of the line and we pressed Enter
+	if ((((eolMode == SC_EOL_CRLF || eolMode == SC_EOL_LF) && ch == '\n') ||
+		(eolMode == SC_EOL_CR && ch == '\r')) && prevLine >= 0 && _pEditView->getLineLength(prevLine) == 0)
+		return;
+
 	if (type == L_C || type == L_CPP || type == L_JAVA || type == L_CS || type == L_OBJC ||
 		type == L_PHP || type == L_JS || type == L_JAVASCRIPT || type == L_JSP || type == L_CSS)
 	{
@@ -3526,12 +3512,8 @@ int Notepad_plus::switchEditViewTo(int gid)
 
 	_activeView = newView;
 	//Good old switcheroo
-	DocTabView * tempTab = _pDocTab;
-	_pDocTab = _pNonDocTab;
-	_pNonDocTab = tempTab;
-	ScintillaEditView * tempView = _pEditView;
-	_pEditView = _pNonEditView;
-	_pNonEditView = tempView;
+	std::swap(_pDocTab, _pNonDocTab);
+	std::swap(_pEditView, _pNonEditView);
 
 	_pEditView->beSwitched();
     _pEditView->getFocus();	//set the focus
@@ -3741,14 +3723,22 @@ bool Notepad_plus::activateBuffer(BufferID id, int whichOne)
 	if (whichOne == MAIN_VIEW)
 	{
 		if (_mainDocTab.activateBuffer(id))	//only activate if possible
+		{
+			_isFolding = true;
 			_mainEditView.activateBuffer(id);
+			_isFolding = false;
+		}
 		else
 			return false;
 	}
 	else
 	{
 		if (_subDocTab.activateBuffer(id))
+		{
+			_isFolding = true;
 			_subEditView.activateBuffer(id);
+			_isFolding = false;
+		}
 		else
 			return false;
 	}
@@ -5457,6 +5447,52 @@ vector<generic_string> Notepad_plus::addNppComponents(const TCHAR *destDir, cons
     return copiedFiles;
 }
 
+vector<generic_string> Notepad_plus::addNppPlugins(const TCHAR *extFilterName, const TCHAR *extFilter)
+{
+	FileDialog fDlg(_pPublicInterface->getHSelf(), _pPublicInterface->getHinst());
+    fDlg.setExtFilter(extFilterName, extFilter, NULL);
+
+    vector<generic_string> copiedFiles;
+
+    if (stringVector *pfns = fDlg.doOpenMultiFilesDlg())
+    {
+        // Get plugins dir
+		generic_string destDirName = (NppParameters::getInstance())->getPluginRootDir();
+
+        if (!::PathFileExists(destDirName.c_str()))
+        {
+            ::CreateDirectory(destDirName.c_str(), NULL);
+        }
+
+        size_t sz = pfns->size();
+        for (size_t i = 0 ; i < sz ; ++i)
+        {
+            if (::PathFileExists(pfns->at(i).c_str()))
+            {
+                // copy to plugins directory
+                generic_string destName = destDirName;
+				
+				generic_string nameExt = ::PathFindFileName(pfns->at(i).c_str());
+				auto pos = nameExt.find_last_of(TEXT("."));
+				if (pos == generic_string::npos)
+					continue;
+
+				generic_string name = nameExt.substr(0, pos);
+				PathAppend(destName, name);
+				if (!::PathFileExists(destName.c_str()))
+				{
+					::CreateDirectory(destName.c_str(), NULL);
+				}
+				PathAppend(destName, nameExt);
+
+                if (::CopyFile(pfns->at(i).c_str(), destName.c_str(), FALSE))
+                    copiedFiles.push_back(destName.c_str());
+            }
+        }
+    }
+    return copiedFiles;
+}
+
 void Notepad_plus::setWorkingDir(const TCHAR *dir)
 {
 	NppParameters * params = NppParameters::getInstance();
@@ -6107,7 +6143,7 @@ DWORD WINAPI Notepad_plus::backupDocument(void * /*param*/)
 		if (!isSnapshotMode)
 			break;
 
-		MainFileManager->backupCurrentBuffer();
+		::PostMessage(Notepad_plus_Window::gNppHWND, NPPM_INTERNAL_SAVEBACKUP, 0, 0);
 	}
 	return TRUE;
 }
@@ -6320,3 +6356,17 @@ bool Notepad_plus::undoStreamComment(bool tryBlockComment)
 	while(1); //do as long as stream-comments are within selection
 }
 
+void Notepad_plus::monitoringStartOrStopAndUpdateUI(Buffer* pBuf, bool isStarting)
+{
+	if (pBuf)
+	{
+		if (isStarting)
+			pBuf->startMonitoring();
+		else
+			pBuf->stopMonitoring();
+
+		checkMenuItem(IDM_VIEW_MONITORING, isStarting);
+		_toolBar.setCheck(IDM_VIEW_MONITORING, isStarting);
+		pBuf->setUserReadOnly(isStarting);
+	}
+}

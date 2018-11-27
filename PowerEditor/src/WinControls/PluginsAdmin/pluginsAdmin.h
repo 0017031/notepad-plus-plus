@@ -27,6 +27,8 @@
 
 #pragma once
 
+#include <cwctype>
+#include <algorithm>
 #include "StaticDialog.h"
 #include "pluginsAdminRes.h"
 #include "TabBar.h"
@@ -41,8 +43,34 @@ struct Version
 	unsigned long _minor = 0;
 	unsigned long _patch = 0;
 	unsigned long _build = 0;
+
+	Version() {};
+	Version(const generic_string& versionStr);
+
 	void setVersionFrom(generic_string filePath);
 	generic_string toString();
+	bool isNumber(const generic_string& s) const {
+		return !s.empty() && 
+			find_if(s.begin(), s.end(), [](char c) { return !isdigit(c); }) == s.end();
+	};
+
+	int compareTo(const Version& v2c) const;
+
+	bool operator < (const Version& v2c) const {
+		return compareTo(v2c) == -1;
+	};
+
+	bool operator > (const Version& v2c) const {
+		return compareTo(v2c) == 1;
+	};
+
+	bool operator == (const Version& v2c) const {
+		return compareTo(v2c) == 0;
+	};
+
+	bool operator != (const Version& v2c) const {
+		return compareTo(v2c) != 0;
+	};
 };
 
 struct PluginUpdateInfo
@@ -56,10 +84,9 @@ struct PluginUpdateInfo
 	generic_string _sourceUrl;
 	generic_string _description;
 	generic_string _author;
-	generic_string _md5;
-	generic_string _id;
+	generic_string _id;           // Plugin package ID: SHA-256 hash
 	generic_string _repository;
-	bool _isVisible = true;     // if false then it should not be displayed 
+	bool _isVisible = true;       // if false then it should not be displayed 
 
 	generic_string describe();
 	PluginUpdateInfo() {};
@@ -127,7 +154,8 @@ class PluginsAdminDlg final : public StaticDialog
 {
 public :
 	PluginsAdminDlg();
-	~PluginsAdminDlg() {}
+	~PluginsAdminDlg() {};
+
     void init(HINSTANCE hInst, HWND parent)	{
         Window::init(hInst, parent);
 	};
@@ -154,6 +182,7 @@ public :
 
 	bool updateListAndLoadFromJson();
 	void setAdminMode(bool isAdm) { _nppCurrentStatus._isAdminMode = isAdm; };
+	generic_string getPluginConfigPath() const;
 
 	bool installPlugins();
 	bool updatePlugins();
@@ -189,8 +218,15 @@ private :
 	long searchInDescsFromCurrentSel(generic_string str2search, bool isNextMode) const {
 		return searchFromCurrentSel(str2search, _inDescs, isNextMode);
 	};
-
+	
 	bool loadFromPluginInfos();
 	bool checkUpdates();
+
+	enum Operation {
+		pa_install = 0,
+		pa_update = 1,
+		pa_remove = 2
+	};
+	bool exitToInstallRemovePlugins(Operation op, const std::vector<PluginUpdateInfo*>& puis);
 };
 
