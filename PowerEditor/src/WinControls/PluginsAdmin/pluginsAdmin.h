@@ -39,194 +39,195 @@ class PluginsManager;
 
 struct Version
 {
-	unsigned long _major = 0;
-	unsigned long _minor = 0;
-	unsigned long _patch = 0;
-	unsigned long _build = 0;
+    unsigned long _major = 0;
+    unsigned long _minor = 0;
+    unsigned long _patch = 0;
+    unsigned long _build = 0;
 
-	Version() {};
-	Version(const generic_string& versionStr);
+    Version() {};
+    Version(const generic_string& versionStr);
 
-	void setVersionFrom(generic_string filePath);
-	generic_string toString();
-	bool isNumber(const generic_string& s) const {
-		return !s.empty() &&
-			find_if(s.begin(), s.end(), [](_TCHAR c) { return !_istdigit(c); }) == s.end();
-	};
+    void setVersionFrom(generic_string filePath);
+    generic_string toString();
+    bool isNumber(const generic_string& s) const {
+        return !s.empty() &&
+            find_if(s.begin(), s.end(), [](_TCHAR c) { return !_istdigit(c); }) == s.end();
+    };
 
-	int compareTo(const Version& v2c) const;
+    int compareTo(const Version& v2c) const;
 
-	bool operator < (const Version& v2c) const {
-		return compareTo(v2c) == -1;
-	};
+    bool operator < (const Version& v2c) const {
+        return compareTo(v2c) == -1;
+    };
 
-	bool operator > (const Version& v2c) const {
-		return compareTo(v2c) == 1;
-	};
+    bool operator > (const Version& v2c) const {
+        return compareTo(v2c) == 1;
+    };
 
-	bool operator == (const Version& v2c) const {
-		return compareTo(v2c) == 0;
-	};
+    bool operator == (const Version& v2c) const {
+        return compareTo(v2c) == 0;
+    };
 
-	bool operator != (const Version& v2c) const {
-		return compareTo(v2c) != 0;
-	};
+    bool operator != (const Version& v2c) const {
+        return compareTo(v2c) != 0;
+    };
 };
 
 struct PluginUpdateInfo
 {
-	generic_string _fullFilePath; // only for the installed Plugin
+    generic_string _fullFilePath; // only for the installed Plugin
 
-	generic_string _folderName;   // plugin folder name - should be the same name with plugin and should be uniq among the plugins
-	generic_string _displayName;  // plugin description name
-	Version _version;
-	generic_string _homepage;
-	generic_string _sourceUrl;
-	generic_string _description;
-	generic_string _author;
-	generic_string _id;           // Plugin package ID: SHA-256 hash
-	generic_string _repository;
-	bool _isVisible = true;       // if false then it should not be displayed
+    generic_string _folderName;   // plugin folder name - should be the same name with plugin and should be uniq among the plugins
+    generic_string _displayName;  // plugin description name
+    Version _version;
+    generic_string _homepage;
+    generic_string _sourceUrl;
+    generic_string _description;
+    generic_string _author;
+    generic_string _id;           // Plugin package ID: SHA-256 hash
+    generic_string _repository;
+    bool _isVisible = true;       // if false then it should not be displayed
 
-	generic_string describe();
-	PluginUpdateInfo() {};
-	PluginUpdateInfo(const generic_string& fullFilePath, const generic_string& fileName);
+    generic_string describe();
+    PluginUpdateInfo() {};
+    PluginUpdateInfo(const generic_string& fullFilePath, const generic_string& fileName);
 };
 
 struct NppCurrentStatus
 {
-	bool _isAdminMode;              // can launch gitup en Admin mode directly
+    bool _isAdminMode = false;              // can launch gitup en Admin mode directly
 
-	bool _isInProgramFiles;         // true: install/update/remove on "Program files" (ADMIN MODE)
-									// false: install/update/remove on NPP_INST or install on %APPDATA%, update/remove on %APPDATA% & NPP_INST (NORMAL MODE)
+    bool _isInProgramFiles = false;         // true: install/update/remove on "Program files" (ADMIN MODE)
+                                    // false: install/update/remove on NPP_INST or install on %APPDATA%, update/remove on %APPDATA% & NPP_INST (NORMAL MODE)
 
-	bool _isAppDataPluginsAllowed;  // true: install on %APPDATA%, update / remove on %APPDATA% & "Program files" or NPP_INST
+    bool _isAppDataPluginsAllowed = false;  // true: install on %APPDATA%, update / remove on %APPDATA% & "Program files" or NPP_INST
 
-	generic_string _nppInstallPath;
-	generic_string _appdataPath;
+    generic_string _nppInstallPath;
+    generic_string _appdataPath;
 
-	// it should determinate :
-	// 1. deployment location : %ProgramFile%   %appdata%   %other%
-	// 2. gitup launch mode:    ADM             ADM         NOMAL
-	bool shouldLaunchInAdmMode() { return _isInProgramFiles; };
+    // it should determinate :
+    // 1. deployment location : %ProgramFile%   %appdata%   %other%
+    // 2. gitup launch mode:    ADM             ADM         NOMAL
+    bool shouldLaunchInAdmMode() { return _isInProgramFiles; };
 };
 
 class PluginViewList
 {
 public:
-	PluginViewList() {};
-	~PluginViewList() {
-		_ui.destroy();
-		for (auto i : _list)
-		{
-			delete i;
-		}
-	};
+    PluginViewList() {};
+    ~PluginViewList() {
+        _ui.destroy();
+        for (auto i : _list)
+        {
+            delete i;
+        }
+    };
 
-	void pushBack(PluginUpdateInfo* pi);
-	HWND getViewHwnd() { return _ui.getHSelf(); };
-	void displayView(bool doShow) const { _ui.display(doShow); };
-	std::vector<size_t> getCheckedIndexes() const { return _ui.getCheckedIndexes(); };
-	std::vector<PluginUpdateInfo*> fromUiIndexesToPluginInfos(const std::vector<size_t>& ) const;
-	long getSelectedIndex() const { return _ui.getSelectedIndex(); };
-	void setSelection(int index) const { _ui.setSelection(index); };
-	void initView(HINSTANCE hInst, HWND parent) { _ui.init(hInst, parent); };
-	void addColumn(const columnInfo & column2Add) { _ui.addColumn(column2Add); };
-	void reSizeView(RECT & rc) { _ui.reSizeTo(rc); }
-	void setViewStyleOption(int32_t extraStyle) { _ui.setStyleOption(extraStyle); };
-	size_t nbItem() const { return _ui.nbItem(); };
-	PluginUpdateInfo* getPluginInfoFromUiIndex(size_t index) const { return reinterpret_cast<PluginUpdateInfo*>(_ui.getLParamFromIndex(static_cast<int>(index))); };
-	PluginUpdateInfo* findPluginInfoFromFolderName(const generic_string& folderName, int& index) const;
-	bool removeFromListIndex(size_t index2remove);
-	bool hideFromListIndex(size_t index2Hide);
-	bool removeFromFolderName(const generic_string& folderName);
-	bool removeFromUiIndex(size_t index2remove);
-	bool hideFromPluginInfoPtr(PluginUpdateInfo* pluginInfo2hide);
-	bool restore(const generic_string& folderName);
-	bool removeFromPluginInfoPtr(PluginUpdateInfo* pluginInfo2hide);
+    void pushBack(PluginUpdateInfo* pi);
+    HWND getViewHwnd() { return _ui.getHSelf(); };
+    void displayView(bool doShow) const { _ui.display(doShow); };
+    std::vector<size_t> getCheckedIndexes() const { return _ui.getCheckedIndexes(); };
+    std::vector<PluginUpdateInfo*> fromUiIndexesToPluginInfos(const std::vector<size_t>&) const;
+    long getSelectedIndex() const { return _ui.getSelectedIndex(); };
+    void setSelection(int index) const { _ui.setSelection(index); };
+    void initView(HINSTANCE hInst, HWND parent) { _ui.init(hInst, parent); };
+    void addColumn(const columnInfo & column2Add) { _ui.addColumn(column2Add); };
+    void reSizeView(RECT & rc) { _ui.reSizeTo(rc); }
+    void setViewStyleOption(int32_t extraStyle) { _ui.setStyleOption(extraStyle); };
+    size_t nbItem() const { return _ui.nbItem(); };
+    PluginUpdateInfo* getPluginInfoFromUiIndex(size_t index) const { return reinterpret_cast<PluginUpdateInfo*>(_ui.getLParamFromIndex(static_cast<int>(index))); };
+    PluginUpdateInfo* findPluginInfoFromFolderName(const generic_string& folderName, int& index) const;
+    bool removeFromListIndex(size_t index2remove);
+    bool hideFromListIndex(size_t index2Hide);
+    bool removeFromFolderName(const generic_string& folderName);
+    bool removeFromUiIndex(size_t index2remove);
+    bool hideFromPluginInfoPtr(PluginUpdateInfo* pluginInfo2hide);
+    bool restore(const generic_string& folderName);
+    bool removeFromPluginInfoPtr(PluginUpdateInfo* pluginInfo2hide);
 
 private:
-	std::vector<PluginUpdateInfo*> _list;
-	ListView _ui;
+    std::vector<PluginUpdateInfo*> _list;
+    ListView _ui;
 };
 
 class PluginsAdminDlg final : public StaticDialog
 {
-public :
-	PluginsAdminDlg();
-	~PluginsAdminDlg() {};
+public:
+    PluginsAdminDlg();
+    ~PluginsAdminDlg() {};
 
-    void init(HINSTANCE hInst, HWND parent)	{
+    void init(HINSTANCE hInst, HWND parent) {
         Window::init(hInst, parent);
-	};
-
-	virtual void create(int dialogID, bool isRTL = false, bool msgDestParent = true);
-
-    void doDialog(bool isRTL = false) {
-    	if (!isCreated())
-		{
-			create(IDD_PLUGINSADMIN_DLG, isRTL);
-		}
-
-		if (!::IsWindowVisible(_hSelf))
-		{
-
-		}
-	    display();
     };
 
-	bool isValide();
+    virtual void create(int dialogID, bool isRTL = false, bool msgDestParent = true);
 
-	void switchDialog(int indexToSwitch);
-	void setPluginsManager(PluginsManager *pluginsManager) { _pPluginsManager = pluginsManager; };
+    void doDialog(bool isRTL = false) {
+        if (!isCreated())
+        {
+            create(IDD_PLUGINSADMIN_DLG, isRTL);
+        }
 
-	bool updateListAndLoadFromJson();
-	void setAdminMode(bool isAdm) { _nppCurrentStatus._isAdminMode = isAdm; };
-	generic_string getPluginConfigPath() const;
+        if (!::IsWindowVisible(_hSelf))
+        {
 
-	bool installPlugins();
-	bool updatePlugins();
-	bool removePlugins();
+        }
+        display();
+    };
+
+    bool isValide();
+
+    void switchDialog(int indexToSwitch);
+    void setPluginsManager(PluginsManager *pluginsManager) { _pPluginsManager = pluginsManager; };
+
+    bool updateListAndLoadFromJson();
+    void setAdminMode(bool isAdm) { _nppCurrentStatus._isAdminMode = isAdm; };
+    generic_string getPluginConfigPath() const;
+
+    bool installPlugins();
+    bool updatePlugins();
+    bool removePlugins();
 
 protected:
-	virtual INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam);
+    virtual INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam);
 
-private :
-	generic_string _updaterDir;
-	generic_string _updaterFullPath;
-	generic_string _pluginListFullPath;
+private:
+    generic_string _updaterDir;
+    generic_string _updaterFullPath;
+    generic_string _pluginListPathDLL;
+    generic_string _pluginListPathJson;
 
-	TabBar _tab;
+    TabBar _tab;
 
-	PluginViewList _availableList; // A permanent list, once it's loaded (no removal - only hide or show)
-	PluginViewList _updateList;    // A dynamical list, items are removable
-	PluginViewList _installedList; // A dynamical list, items are removable
+    PluginViewList _availableList; // A permanent list, once it's loaded (no removal - only hide or show)
+    PluginViewList _updateList;    // A dynamical list, items are removable
+    PluginViewList _installedList; // A dynamical list, items are removable
 
-	PluginsManager *_pPluginsManager = nullptr;
-	NppCurrentStatus _nppCurrentStatus;
+    PluginsManager *_pPluginsManager = nullptr;
+    NppCurrentStatus _nppCurrentStatus;
 
-	void collectNppCurrentStatusInfos();
-	bool searchInPlugins(bool isNextMode) const;
-	const bool _inNames = true;
-	const bool _inDescs = false;
-	bool isFoundInAvailableListFromIndex(int index, generic_string str2search, bool inWhichPart) const;
-	long searchFromCurrentSel(generic_string str2search, bool inWhichPart, bool isNextMode) const;
-	long searchInNamesFromCurrentSel(generic_string str2search, bool isNextMode) const {
-		return searchFromCurrentSel(str2search, _inNames, isNextMode);
-	};
+    void collectNppCurrentStatusInfos();
+    bool searchInPlugins(bool isNextMode) const;
+    const bool _inNames = true;
+    const bool _inDescs = false;
+    bool isFoundInAvailableListFromIndex(int index, generic_string str2search, bool inWhichPart) const;
+    long searchFromCurrentSel(generic_string str2search, bool inWhichPart, bool isNextMode) const;
+    long searchInNamesFromCurrentSel(generic_string str2search, bool isNextMode) const {
+        return searchFromCurrentSel(str2search, _inNames, isNextMode);
+    };
 
-	long searchInDescsFromCurrentSel(generic_string str2search, bool isNextMode) const {
-		return searchFromCurrentSel(str2search, _inDescs, isNextMode);
-	};
+    long searchInDescsFromCurrentSel(generic_string str2search, bool isNextMode) const {
+        return searchFromCurrentSel(str2search, _inDescs, isNextMode);
+    };
 
-	bool loadFromPluginInfos();
-	bool checkUpdates();
+    bool loadFromPluginInfos();
+    bool checkUpdates();
 
-	enum Operation {
-		pa_install = 0,
-		pa_update = 1,
-		pa_remove = 2
-	};
-	bool exitToInstallRemovePlugins(Operation op, const std::vector<PluginUpdateInfo*>& puis);
+    enum Operation {
+        pa_install = 0,
+        pa_update = 1,
+        pa_remove = 2
+    };
+    bool exitToInstallRemovePlugins(Operation op, const std::vector<PluginUpdateInfo*>& puis);
 };
 
