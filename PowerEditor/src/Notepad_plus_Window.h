@@ -36,7 +36,6 @@ notepad++ [--help] [-multiInst] [-noPlugin] [-lLanguage] [-LlangCode] [-nLineNum
 --help : This help message\r\
 -multiInst : Launch another Notepad++ instance\r\
 -noPlugin : Launch Notepad++ without loading any plugin\r\
--l : Open file or display ghost typing with syntax highlighting of choice\r\
 -L : Apply indicated localization, langCode is browser language code\r\
 -n : Scroll to indicated line on filePath\r\
 -c : Scroll to indicated column on filePath\r\
