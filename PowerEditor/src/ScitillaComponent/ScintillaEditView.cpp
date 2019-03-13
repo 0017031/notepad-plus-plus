@@ -32,7 +32,7 @@
 #include "Parameters.h"
 #include "Sorters.h"
 #include "tchar.h"
-#include "verifySignedFile.h"
+#include "verifySignedfile.h"
 
 using namespace std;
 
@@ -205,7 +205,7 @@ HMODULE loadSciLexerDll()
 	// Do not check dll signature if npp is running in debug mode
 	// This is helpful for developers to skip signature checking
 	// while analyzing issue or modifying the lexer dll
-#ifndef _DEBUG
+#if 0 //ndef _DEBUG
 	SecurityGard securityGard;
 	bool isOK = securityGard.checkModule(sciLexerPath, nm_scilexer);
 
@@ -385,7 +385,7 @@ LRESULT ScintillaEditView::scintillaNew_Proc(HWND hwnd, UINT Message, WPARAM wPa
 	{
 		case WM_MOUSEHWHEEL :
 		{
-			::CallWindowProc(_scintillaDefaultProc, hwnd, WM_HSCROLL, ((short)HIWORD(wParam) > 0)?SB_LINERIGHT:SB_LINELEFT, NULL);
+			::CallWindowProc(_scintillaDefaultProc, hwnd, WM_HSCROLL, ((short)HIWORD(wParam) > 0)?SB_LINERIGHT:SB_LINELEFT, LPARAM{});
 			break;
 		}
 
@@ -399,9 +399,9 @@ LRESULT ScintillaEditView::scintillaNew_Proc(HWND hwnd, UINT Message, WPARAM wPa
 
 			if (LOWORD(wParam) & MK_SHIFT) {
 				// move 3 columns at a time
-				::CallWindowProc(_scintillaDefaultProc, hwnd, WM_HSCROLL, ((short)HIWORD(wParam) < 0) ? SB_LINERIGHT : SB_LINELEFT, NULL);
-				::CallWindowProc(_scintillaDefaultProc, hwnd, WM_HSCROLL, ((short)HIWORD(wParam) < 0) ? SB_LINERIGHT : SB_LINELEFT, NULL);
-				::CallWindowProc(_scintillaDefaultProc, hwnd, WM_HSCROLL, ((short)HIWORD(wParam) < 0) ? SB_LINERIGHT : SB_LINELEFT, NULL);
+				::CallWindowProc(_scintillaDefaultProc, hwnd, WM_HSCROLL, ((short)HIWORD(wParam) < 0) ? SB_LINERIGHT : SB_LINELEFT, LPARAM{});
+				::CallWindowProc(_scintillaDefaultProc, hwnd, WM_HSCROLL, ((short)HIWORD(wParam) < 0) ? SB_LINERIGHT : SB_LINELEFT, LPARAM{});
+				::CallWindowProc(_scintillaDefaultProc, hwnd, WM_HSCROLL, ((short)HIWORD(wParam) < 0) ? SB_LINERIGHT : SB_LINELEFT, LPARAM{});
 				return TRUE;
 			}
 
@@ -1418,7 +1418,7 @@ void ScintillaEditView::defineDocType(LangType typeDoc)
     }
 	setSpecialIndicator(*pStyle);
 
-    // Il faut surtout faire un test ici avant d'exécuter SCI_SETCODEPAGE
+    // Il faut surtout faire un test ici avant d'exï¿½cuter SCI_SETCODEPAGE
     // Sinon y'aura un soucis de performance!
 	if (isCJK())
 	{
@@ -2090,7 +2090,7 @@ void ScintillaEditView::getVisibleStartAndEndPosition(int * startPos, int * endP
 	auto lineCount = execute(SCI_GETLINECOUNT);
 	auto visibleLine = execute(SCI_DOCLINEFROMVISIBLE, firstVisibleLine + min(linesOnScreen, lineCount));
 	*endPos = static_cast<int32_t>(execute(SCI_POSITIONFROMLINE, visibleLine));
-	if (*endPos == -1) 
+	if (*endPos == -1)
 		*endPos = static_cast<int32_t>(execute(SCI_GETLENGTH));
 }
 
@@ -2591,7 +2591,7 @@ void ScintillaEditView::currentLinesDown() const
 
 void ScintillaEditView::changeCase(__inout wchar_t * const strWToConvert, const int & nbChars, const TextCase & caseToConvert) const
 {
-	if (strWToConvert == nullptr || nbChars == NULL)
+	if (strWToConvert == nullptr || nbChars == 0)
 		return;
 
 	switch (caseToConvert)
@@ -2600,17 +2600,19 @@ void ScintillaEditView::changeCase(__inout wchar_t * const strWToConvert, const 
 		{
 			for (int i = 0; i < nbChars; ++i)
 			{
-				strWToConvert[i] = (WCHAR)(UINT_PTR)::CharUpperW((LPWSTR)strWToConvert[i]);
+				
+				//*(strWToConvert+i)  = wchar_t(std::towupper(*(strWToConvert+i)))    ;
+				strWToConvert[i] = static_cast<wchar_t>(std::towupper(static_cast<wint_t>(strWToConvert[i])));
 			}
-			break; 
+			break;
 		} //case UPPERCASE
 		case LOWERCASE:
 		{
 			for (int i = 0; i < nbChars; ++i)
 			{
-				strWToConvert[i] = (WCHAR)(UINT_PTR)::CharLowerW((LPWSTR)strWToConvert[i]);
+				strWToConvert[i] = static_cast<wchar_t>(std::towlower(static_cast<wint_t>(strWToConvert[i])));
 			}
-			break; 
+			break;
 		} //case LOWERCASE
 		case TITLECASE_FORCE:
 		case TITLECASE_BLEND:
@@ -2620,15 +2622,15 @@ void ScintillaEditView::changeCase(__inout wchar_t * const strWToConvert, const 
 				if (::IsCharAlphaW(strWToConvert[i]))
 				{
 					if ((i < 1) ? true : not ::IsCharAlphaNumericW(strWToConvert[i - 1]))
-						strWToConvert[i] = (WCHAR)(UINT_PTR)::CharUpperW((LPWSTR)strWToConvert[i]);
+						strWToConvert[i] = static_cast<wchar_t>(std::towupper(static_cast<wint_t>(strWToConvert[i])));
 					else if (caseToConvert == TITLECASE_FORCE)
-						strWToConvert[i] = (WCHAR)(UINT_PTR)::CharLowerW((LPWSTR)strWToConvert[i]);
+						strWToConvert[i] = static_cast<wchar_t>(std::towlower(static_cast<wint_t>(strWToConvert[i])));
 					//An exception
 					if ((i < 2) ? false : (strWToConvert[i - 1] == L'\'' && ::IsCharAlphaW(strWToConvert[i - 2])))
-						strWToConvert[i] = (WCHAR)(UINT_PTR)::CharLowerW((LPWSTR)strWToConvert[i]);
+						strWToConvert[i] = static_cast<wchar_t>(std::towlower(static_cast<wint_t>(strWToConvert[i])));
 				}
 			}
-			break; 
+			break;
 		} //case TITLECASE
 		case SENTENCECASE_FORCE:
 		case SENTENCECASE_BLEND:
@@ -2642,12 +2644,12 @@ void ScintillaEditView::changeCase(__inout wchar_t * const strWToConvert, const 
 				{
 					if (isNewSentence)
 					{
-						strWToConvert[i] = (WCHAR)(UINT_PTR)::CharUpperW((LPWSTR)strWToConvert[i]);
+						strWToConvert[i] = static_cast<wchar_t>(std::towupper(static_cast<wint_t>(strWToConvert[i])));
 						isNewSentence = false;
 					}
 					else if (caseToConvert == SENTENCECASE_FORCE)
 					{
-						strWToConvert[i] = (WCHAR)(UINT_PTR)::CharLowerW((LPWSTR)strWToConvert[i]);
+						strWToConvert[i] = static_cast<wchar_t>(std::towlower(static_cast<wint_t>(strWToConvert[i])));
 					}
 					wasEolR = false;
 					wasEolN = false;
@@ -2688,11 +2690,11 @@ void ScintillaEditView::changeCase(__inout wchar_t * const strWToConvert, const 
 			for (int i = 0; i < nbChars; ++i)
 			{
 				if (::IsCharLowerW(strWToConvert[i]))
-					strWToConvert[i] = (WCHAR)(UINT_PTR)::CharUpperW((LPWSTR)strWToConvert[i]);
+					strWToConvert[i] = static_cast<wchar_t>(std::towupper(static_cast<wint_t>(strWToConvert[i])));
 				else
-					strWToConvert[i] = (WCHAR)(UINT_PTR)::CharLowerW((LPWSTR)strWToConvert[i]);
+					strWToConvert[i] = static_cast<wchar_t>(std::towlower(static_cast<wint_t>(strWToConvert[i])));
 			}
-			break; 
+			break;
 		} //case INVERTCASE
 		case RANDOMCASE:
 		{
@@ -2701,12 +2703,12 @@ void ScintillaEditView::changeCase(__inout wchar_t * const strWToConvert, const 
 				if (::IsCharAlphaW(strWToConvert[i]))
 				{
 					if (std::rand() & true)
-						strWToConvert[i] = (WCHAR)(UINT_PTR)::CharUpperW((LPWSTR)strWToConvert[i]);
+						strWToConvert[i] = static_cast<wchar_t>(std::towupper(static_cast<wint_t>(strWToConvert[i])));
 					else
-						strWToConvert[i] = (WCHAR)(UINT_PTR)::CharLowerW((LPWSTR)strWToConvert[i]);
+						strWToConvert[i] = static_cast<wchar_t>(std::towlower(static_cast<wint_t>(strWToConvert[i])));
 				}
 			}
-			break; 
+			break;
 		} //case RANDOMCASE
 	} //switch (caseToConvert)
 }

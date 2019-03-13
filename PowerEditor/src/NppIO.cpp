@@ -82,9 +82,9 @@ DWORD WINAPI Notepad_plus::monitorFileOnChange(void * params)
 				else
 				{
 					DWORD dwAction;
-					CStringW wstrFilename;
+					generic_string wstrFilename;
 					changes.Pop(dwAction, wstrFilename);
-					generic_string fn = wstrFilename.GetString();
+					generic_string fn = wstrFilename;
 
 					// Fix monitoring files which are under root problem
 					size_t pos = fn.find(TEXT("\\\\"));
@@ -256,7 +256,7 @@ BufferID Notepad_plus::doOpen(const generic_string& fileName, bool isRecursive, 
     SCNotification scnN;
     scnN.nmhdr.code = NPPN_FILEBEFORELOAD;
     scnN.nmhdr.hwndFrom = _pPublicInterface->getHSelf();
-    scnN.nmhdr.idFrom = NULL;
+    scnN.nmhdr.idFrom = uptr_t{};
     _pluginsManager.notify(&scnN);
 
     if (encoding == -1)
@@ -267,7 +267,7 @@ BufferID Notepad_plus::doOpen(const generic_string& fileName, bool isRecursive, 
 	BufferID buffer;
 	if (isSnapshotMode)
 	{
-		buffer = MainFileManager->loadFile(longFileName, NULL, encoding, backupFileName, fileNameTimestamp);
+		buffer = MainFileManager->loadFile(longFileName, Document{}, encoding, backupFileName, fileNameTimestamp);
 
 		if (buffer != BUFFER_INVALID)
 		{
@@ -287,10 +287,10 @@ BufferID Notepad_plus::doOpen(const generic_string& fileName, bool isRecursive, 
 	}
 	else
 	{
-		buffer = MainFileManager->loadFile(longFileName, NULL, encoding);
+		buffer = MainFileManager->loadFile(longFileName, Document{}, encoding);
 	}
 
-    if (buffer != BUFFER_INVALID)
+	if (buffer != BUFFER_INVALID)
     {
         _isFileOpening = true;
 

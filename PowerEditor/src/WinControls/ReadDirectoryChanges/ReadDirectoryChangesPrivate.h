@@ -26,6 +26,10 @@
 //	http://qualapps.blogspot.com/2010/05/understanding-readdirectorychangesw.html
 //	See ReadMe.txt for overview information.
 
+#ifndef _MSC_VER
+#define __in
+#endif
+
 class CReadDirectoryChanges;
 
 namespace ReadDirectoryChangesPrivate
@@ -77,7 +81,7 @@ protected:
 	// Parameters from the caller for ReadDirectoryChangesW().
 	DWORD		m_dwFilterFlags;
 	BOOL		m_bIncludeChildren;
-	CStringW	m_wstrDirectory;
+	generic_string	m_wstrDirectory;
 
 	// Result of calling CreateFile().
 	HANDLE		m_hDirectory;

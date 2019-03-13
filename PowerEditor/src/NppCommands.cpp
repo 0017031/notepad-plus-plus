@@ -84,7 +84,7 @@ void Notepad_plus::command(int id)
 
 		case IDM_FILE_OPEN_FOLDER:
 		{
-			Command cmd(TEXT("explorer /select,\"$(FULL_CURRENT_PATH)\""));
+			Command cmd{TEXT("explorer /select,\"$(FULL_CURRENT_PATH)\"")};
 			cmd.run(_pPublicInterface->getHSelf());
 		}
 		break;
@@ -459,7 +459,7 @@ void Notepad_plus::command(int id)
 			if (nppGui._searchEngineChoice == nppGui.se_custom)
 			{
 				url = nppGui._searchEngineCustom;
-				remove_if(url.begin(), url.end(), isspace);
+				remove_if(url.begin(), url.end(), _istspace);
 
 				auto httpPos = url.find(TEXT("http://"));
 				auto httpsPos = url.find(TEXT("https://"));

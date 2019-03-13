@@ -30,7 +30,7 @@
 #include "ScintillaEditView.h"
 #include "localization.h"
 #include <fstream>
-
+#include <filesystem>  
 using nlohmann::json;
 using namespace std;
 
@@ -260,8 +260,8 @@ bool FunctionListPanel::serialize(const generic_string & outputFilename)
 	const char* nameLabel = "name";
 
 	WcharMbcsConvertor *wmc = WcharMbcsConvertor::getInstance();
-	json j;
-	j[rootLabel] = wmc->wchar2char(fileNameLabel, CP_ACP);
+	nlohmann::json my_jsonObj;
+	my_jsonObj[rootLabel] = wmc->wchar2char(fileNameLabel, CP_ACP);
 
 	for (const auto & info : _foundFuncInfos)
 	{
@@ -272,7 +272,7 @@ bool FunctionListPanel::serialize(const generic_string & outputFilename)
 			bool isFound = false;
 			std::string nodeName = wmc->wchar2char(info._data2.c_str(), CP_ACP);
 
-			for (auto & i : j[nodesLabel])
+			for (auto & i : my_jsonObj[nodesLabel])
 			{
 				if (nodeName == i[nameLabel])
 				{
@@ -286,17 +286,19 @@ bool FunctionListPanel::serialize(const generic_string & outputFilename)
 			{
 				json aNode = { { leavesLabel, json::array() },{ nameLabel, nodeName.c_str() } };
 				aNode[leavesLabel].push_back(leafName.c_str());
-				j[nodesLabel].push_back(aNode);
+				my_jsonObj[nodesLabel].push_back(aNode);
 			}
 		}
 		else // leaf
 		{
-			j[leavesLabel].push_back(leafName.c_str());
+			my_jsonObj[leavesLabel].push_back(leafName.c_str());
 		}
 	}
 
-	std::ofstream file(fname2write);
-	file << j;
+	auto myfile = std::filesystem::path(fname2write);
+//	std::ofstream file(myfile.c_str());
+	std::ofstream file(myfile);
+	file << my_jsonObj;
 
 	return true;
 }

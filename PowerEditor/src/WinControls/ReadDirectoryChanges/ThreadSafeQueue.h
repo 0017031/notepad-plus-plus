@@ -27,90 +27,81 @@
 //	See ReadMe.txt for overview information.
 
 #include <list>
+#include <mutex>
 
-template <typename C>
-class CThreadSafeQueue : protected std::list<C>
-{
+template<typename C>
+class CThreadSafeQueue : protected std::list<C> {
 public:
-	CThreadSafeQueue(int nMaxCount)
-	{
-		m_bOverflow = false;
+    CThreadSafeQueue(int nMaxCount) {
+        m_bOverflow = false;
 
-		m_hSemaphore = ::CreateSemaphore(
-			NULL,		// no security attributes
-			0,			// initial count
-			nMaxCount,	// max count
-			NULL);		// anonymous
-	}
+        m_hSemaphore = ::CreateSemaphore(
+                NULL,        // no security attributes
+                0,            // initial count
+                nMaxCount,    // max count
+                NULL);        // anonymous
+    }
 
-	~CThreadSafeQueue()
-	{
-		::CloseHandle(m_hSemaphore);
-		m_hSemaphore = NULL;
-	}
+    ~CThreadSafeQueue() {
+        ::CloseHandle(m_hSemaphore);
+        m_hSemaphore = NULL;
+    }
 
-	void push(C& c)
-	{
-		CComCritSecLock<CComAutoCriticalSection> lock( m_Crit, true );
-		push_back( c );
-		lock.Unlock();
+    void push(C &c) {
+        std::unique_lock<std::mutex> lock(mtx);
+        push_back(c);
+        lock.unlock();
 
-		if (!::ReleaseSemaphore(m_hSemaphore, 1, NULL))
-		{
-			// If the semaphore is full, then take back the entry.
-			lock.Lock();
-			pop_back();
-			if (GetLastError() == ERROR_TOO_MANY_POSTS)
-			{
-				m_bOverflow = true;
-			}
-		}
-	}
+        if (!::ReleaseSemaphore(m_hSemaphore, 1, NULL)) {
+            // If the semaphore is full, then take back the entry.
+            lock.lock();
+            std::list<C>::pop_back();
+            if (GetLastError() == ERROR_TOO_MANY_POSTS) {
+                m_bOverflow = true;
+            }
+        }
+    }
 
-	bool pop(C& c)
-	{
-		CComCritSecLock<CComAutoCriticalSection> lock( m_Crit, true );
+    bool pop(C &c) {
+        std::unique_lock<std::mutex> lock(mtx);
 
-		// If the user calls pop() more than once after the
-		// semaphore is signaled, then the semaphore count will
-		// get out of sync.  We fix that when the queue empties.
-		if (empty())
-		{
-			while (::WaitForSingleObject(m_hSemaphore, 0) != WAIT_TIMEOUT)
-				1;
-			return false;
-		}
+        // If the user calls pop() more than once after the
+        // semaphore is signaled, then the semaphore count will
+        // get out of sync.  We fix that when the queue empties.
+        if (this->empty()) {
+            while (::WaitForSingleObject(m_hSemaphore, 0) != WAIT_TIMEOUT)
+                1;
+            return false;
+        }
 
-		c = front();
-		pop_front();
+        c = std::list<C>::front();
+        std::list<C>::pop_front();
 
-		return true;
-	}
+        return true;
+    }
 
-	// If overflow, use this to clear the queue.
-	void clear()
-	{
-		CComCritSecLock<CComAutoCriticalSection> lock( m_Crit, true );
+    // If overflow, use this to clear the queue.
+    void clear() {
+        std::unique_lock<std::mutex> lock(mtx);
 
-		for (DWORD i=0; i<size(); i++)
-			WaitForSingleObject(m_hSemaphore, 0);
+        for (DWORD i = 0; i < this->size(); i++)
+            WaitForSingleObject(m_hSemaphore, 0);
 
-		__super::clear();
+        std::list<C>::clear();
 
-		m_bOverflow = false;
-	}
+        m_bOverflow = false;
+    }
 
-	bool overflow()
-	{
-		return m_bOverflow;
-	}
+    bool overflow() {
+        return m_bOverflow;
+    }
 
-	HANDLE GetWaitHandle() { return m_hSemaphore; }
+    HANDLE GetWaitHandle() { return m_hSemaphore; }
 
 protected:
-	HANDLE m_hSemaphore;
+    HANDLE m_hSemaphore;
 
-	CComAutoCriticalSection m_Crit;
+    std::mutex mtx;
 
-	bool m_bOverflow;
+    bool m_bOverflow;
 };
