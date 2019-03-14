@@ -64,6 +64,7 @@ END
 IDI_M30ICON                     ICON      "icons/npp.ico"
 IDI_CHAMELEON                   ICON      "icons/chameleon.ico"
 //IDI_JESUISCHARLIE               ICON      "icons/Je_suis_Charlie.ico"
+//IDI_GILETJAUNE               ICON      "icons/giletJaune.ico"
 IDI_NEW_OFF_ICON                ICON      "icons/new_off.ico"
 IDI_OPEN_OFF_ICON               ICON      "icons/open_off.ico"
 IDI_SAVE_OFF_ICON               ICON      "icons/save_off.ico"
@@ -297,6 +298,7 @@ BEGIN
         POPUP "Line Operations"
         BEGIN
             MENUITEM "Duplicate Current Line",    IDM_EDIT_DUP_LINE
+            MENUITEM "Remove Consecutive Duplicate Lines",               IDM_EDIT_REMOVE_DUP_LINES
             MENUITEM "Split Lines",               IDM_EDIT_SPLIT_LINES
             MENUITEM "Join Lines",                IDM_EDIT_JOIN_LINES
             MENUITEM "Move Up Current Line",      IDM_EDIT_LINE_UP
@@ -933,6 +935,12 @@ BEGIN
 			MENUITEM "Generate from files...",                 IDM_TOOL_MD5_GENERATEFROMFILE
 			MENUITEM "Generate from selection into clipboard", IDM_TOOL_MD5_GENERATEINTOCLIPBOARD
         END
+		POPUP "SHA-256"
+		BEGIN
+			MENUITEM "Generate...", IDM_TOOL_SHA256_GENERATE
+			MENUITEM "Generate from files...", IDM_TOOL_SHA256_GENERATEFROMFILE
+			MENUITEM "Generate from selection into clipboard", IDM_TOOL_SHA256_GENERATEINTOCLIPBOARD
+		END
     END
 	
 	POPUP "&Macro"
@@ -957,7 +965,7 @@ BEGIN
         MENUITEM "Notepad++ Project Page",    IDM_PROJECTPAGE
         MENUITEM "Notepad++ Community (Forum)",                     IDM_FORUM
 		MENUITEM "Live Support",				IDM_ONLINESUPPORT
-        MENUITEM "Get More Plugins",          IDM_PLUGINSHOME
+        //MENUITEM "Get More Plugins",          IDM_PLUGINSHOME
         MENUITEM SEPARATOR
         MENUITEM "Update Notepad++",          IDM_UPDATE_NPP
 		MENUITEM "Set Updater Proxy...",         IDM_CONFUPDATERPROXY
@@ -991,6 +999,7 @@ BEGIN
     EDITTEXT        IDC_BUILD_DATETIME,150,2,150,10, ES_READONLY | NOT WS_BORDER
     CONTROL         "",IDI_CHAMELEON,"Static",SS_OWNERDRAW,20,5,64,64
     //CONTROL         "",IDI_JESUISCHARLIE,"Static",SS_OWNERDRAW,20,5,64,64
+    //CONTROL         "",IDI_GILETJAUNE,"Static",SS_OWNERDRAW,20,5,64,64
     LTEXT           NOTEPAD_PLUS_VERSION, IDC_STATIC,70,20,140,11
     LTEXT           "bit",IDC_VERSION_BIT,150,20,140,11
     LTEXT           "Author :",IDC_STATIC,21,45,31,8

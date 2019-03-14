@@ -273,8 +273,10 @@ private:
     AboutDlg _aboutDlg;
 	DebugInfoDlg _debugInfoDlg;
 	RunDlg _runDlg;
-	MD5FromFilesDlg _md5FromFilesDlg;
-	MD5FromTextDlg _md5FromTextDlg;
+	HashFromFilesDlg _md5FromFilesDlg;
+	HashFromTextDlg _md5FromTextDlg;
+	HashFromFilesDlg _sha2FromFilesDlg;
+	HashFromTextDlg _sha2FromTextDlg;
     GoToLineDlg _goToLineDlg;
 	ColumnEditorDlg _colEditorDlg;
 	WordStyleDlg _configStyleDlg;
@@ -559,6 +561,7 @@ private:
 	void wsTabConvert(spaceTab whichWay);
 	void doTrim(trimOp whichPart);
 	void removeEmptyLine(bool isBlankContained);
+	void removeDuplicateLines();
 	void launchAnsiCharPanel();
 	void launchClipboardHistoryPanel();
 	void launchFileSwitcherPanel();

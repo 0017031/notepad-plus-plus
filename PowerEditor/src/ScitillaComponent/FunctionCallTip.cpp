@@ -268,7 +268,7 @@ bool FunctionCallTip::getCursorFunction()
 		bool same = false;
 		if (_funcName)
 		{
-			if(_ignoreCase)
+			if (_ignoreCase)
 				same = testNameNoCase(_funcName, funcToken.token, lstrlen(_funcName)) == 0;
 			else
 				same = generic_strncmp(_funcName, funcToken.token, lstrlen(_funcName)) == 0;
@@ -280,7 +280,7 @@ bool FunctionCallTip::getCursorFunction()
 				delete [] _funcName;
 			}
 			_funcName = new TCHAR[funcToken.length+1];
-			lstrcpy(_funcName, funcToken.token);
+			wcscpy_s(_funcName, funcToken.length+1, funcToken.token);
 			res = loadFunction();
 		}
 		else

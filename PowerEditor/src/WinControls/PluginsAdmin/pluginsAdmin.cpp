@@ -34,7 +34,6 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <uxtheme.h>
-#include <locale>
 #include "pluginsAdmin.h"
 #include "ScintillaEditView.h"
 #include "localization.h"
@@ -42,6 +41,9 @@
 #include "PluginsManager.h"
 #include "verifySignedFile.h"
 #include "LongRunningOperation.h"
+
+#define TEXTFILE        256
+#define IDR_PLUGINLISTJSONFILE  101
 
 using namespace std;
 using nlohmann::json;
@@ -208,7 +210,7 @@ bool findStrNoCase(const generic_string & strHaystack, const generic_string & st
 	auto it = std::search(
 		strHaystack.begin(), strHaystack.end(),
 		strNeedle.begin(), strNeedle.end(),
-        [](auto ch1, auto ch2) {return std::toupper(ch1, locale()) == std::toupper(ch2, locale()); }
+		[](TCHAR ch1, TCHAR ch2){return _totupper(ch1) == _totupper(ch2); }
 	);
 	return (it != strHaystack.end());
 }
@@ -428,35 +430,9 @@ PluginsAdminDlg::PluginsAdminDlg()
 	PathAppend(_updaterFullPath, TEXT("gup.exe"));
 
 	// get plugin-list path
-    _pluginListPathJson = getPluginConfigPath();
+    _pluginListPathDLL = _pluginListPathJson = pNppParameters->getPluginConfigPath();
     PathAppend(_pluginListPathJson, TEXT("nppPluginList.json"));
-    _pluginListPathDLL = getPluginConfigPath();
     PathAppend(_pluginListPathDLL, TEXT("nppPluginList.dll"));
-}
-
-generic_string PluginsAdminDlg::getPluginConfigPath() const
-{
-	NppParameters *pNppParameters = NppParameters::getInstance();
-	generic_string nppPluginsConfDir;
-
-	if (pNppParameters->isLocal())
-	{
-		nppPluginsConfDir = pNppParameters->getNppPath();
-	}
-	else
-	{
-		nppPluginsConfDir = pNppParameters->getAppDataNppDir();
-	}
-
-	PathAppend(nppPluginsConfDir, TEXT("plugins"));
-	PathAppend(nppPluginsConfDir, TEXT("Config"));
-
-	if (!::PathFileExists(nppPluginsConfDir.c_str()))
-	{
-		::CreateDirectory(nppPluginsConfDir.c_str(), NULL);
-	}
-
-	return nppPluginsConfDir;
 }
 
 bool PluginsAdminDlg::exitToInstallRemovePlugins(Operation op, const vector<PluginUpdateInfo*>& puis)
@@ -629,7 +605,10 @@ void PluginViewList::pushBack(PluginUpdateInfo* pi)
 	Version v = pi->_version;
 	values2Add.push_back(v.toString());
 	//values2Add.push_back(TEXT("Yes"));
-	_ui.addLine(values2Add, reinterpret_cast<LPARAM>(pi));
+
+	// add in order
+	size_t i = _ui.findAlphabeticalOrderPos(pi->_displayName, _sortType == DISPLAY_NAME_ALPHABET_ENCREASE ? _ui.sortEncrease : _ui.sortDecrease);
+	_ui.addLine(values2Add, reinterpret_cast<LPARAM>(pi), static_cast<int>(i));
 }
 
 bool loadFromJson(PluginViewList & pl, const json& j)
@@ -705,7 +684,7 @@ typedef const char * (__cdecl * PFUNCGETPLUGINLIST)();
 
 bool PluginsAdminDlg::isValide()
 {
-    
+
     if (!::PathFileExists(_pluginListPathDLL.c_str())
         &&
         !::PathFileExists(_pluginListPathJson.c_str()))
@@ -713,7 +692,6 @@ bool PluginsAdminDlg::isValide()
 		return false;
 	}
 
-    //generic_string gupPath;
 	if (!::PathFileExists(_updaterFullPath.c_str()))
 	{
 		return false;
@@ -732,9 +710,16 @@ bool PluginsAdminDlg::updateListAndLoadFromJson()
 
 		json j;
 
-        if (PathFileExists(_pluginListPathDLL.c_str()))
-        {
-            hLib = ::LoadLibrary(_pluginListPathDLL.c_str());
+#ifdef DEBUG // if not debug, then it's release
+
+		// load from nppPluginList.json instead of nppPluginList.dll
+		ifstream nppPluginListJson(_pluginListFullPath);
+		nppPluginListJson >> j;
+
+#else //RELEASE
+
+		hLib = ::LoadLibraryEx(_pluginListFullPath.c_str(), 0, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
+
 		if (!hLib)
 		{
 			// Error treatment
@@ -742,11 +727,9 @@ bool PluginsAdminDlg::updateListAndLoadFromJson()
 			return false;
 		}
 
-		PFUNCGETPLUGINLIST pGetListFunc = (PFUNCGETPLUGINLIST)GetProcAddress(hLib, "getList");
-		if (!pGetListFunc)
+		HRSRC rc = ::FindResource(hLib, MAKEINTRESOURCE(IDR_PLUGINLISTJSONFILE), MAKEINTRESOURCE(TEXTFILE));
+		if (!rc)
 		{
-			// Error treatment
-			//printStr(TEXT("getList PB!!!"));
 			::FreeLibrary(hLib);
 			return false;
 		}
@@ -757,11 +740,11 @@ bool PluginsAdminDlg::updateListAndLoadFromJson()
 		j = j.parse(pl);
 }
         else
-        {
+		{
             // load from nppPluginList.json instead of nppPluginList.dll
             ifstream nppPluginListJson(_pluginListPathJson);
             nppPluginListJson >> j;
-        }
+		}
         //#endif
 		// if absent then download it
 
@@ -810,7 +793,7 @@ bool PluginsAdminDlg::loadFromPluginInfos()
 
 		// user file name (without ext. to find whole info in available list
 		TCHAR fnNoExt[MAX_PATH];
-		lstrcpy(fnNoExt, i._fileName.c_str());
+		wcscpy_s(fnNoExt, i._fileName.c_str());
 		::PathRemoveExtension(fnNoExt);
 
 		int listIndex;
@@ -1081,7 +1064,6 @@ INT_PTR CALLBACK PluginsAdminDlg::run_dlgProc(UINT message, WPARAM wParam, LPARA
 	{
         case WM_INITDIALOG :
 		{
-
 			return TRUE;
 		}
 

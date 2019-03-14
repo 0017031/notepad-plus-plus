@@ -27,12 +27,12 @@
 
 #pragma once
 
-#define NOTEPAD_PLUS_VERSION TEXT("v7.6_edge,vs2017")
+#define NOTEPAD_PLUS_VERSION TEXT("v7.6.4_edge,vs2017")
 
 // should be X.Y : ie. if VERSION_DIGITALVALUE == 4, 7, 1, 0 , then X = 4, Y = 71
 // ex : #define VERSION_VALUE TEXT("5.63\0")
-#define VERSION_VALUE TEXT("7.6edge\0")
-#define VERSION_DIGITALVALUE 7, 6, 0, 0
+#define VERSION_VALUE TEXT("7.64\0")
+#define VERSION_DIGITALVALUE 7, 6, 4, 0
 
 
 
@@ -43,6 +43,8 @@
 #define IDI_M30ICON                100
 #define IDI_CHAMELEON            101
 //#define IDI_JESUISCHARLIE        102
+//#define IDI_GILETJAUNE        102
+
 #define IDR_RT_MANIFEST         103
 
 #define IDI_NEW_OFF_ICON      201

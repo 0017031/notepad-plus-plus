@@ -50,7 +50,7 @@ DWORD WINAPI Notepad_plus::monitorFileOnChange(void * params)
 
 	//The folder to watch :
 	WCHAR folderToMonitor[MAX_PATH];
-	lstrcpy(folderToMonitor, fullFileName);
+	wcscpy_s(folderToMonitor, fullFileName);
 
 	::PathRemoveFileSpecW(folderToMonitor);
 	
@@ -153,27 +153,31 @@ BufferID Notepad_plus::doOpen(const generic_string& fileName, bool isRecursive, 
 	bool isSnapshotMode = backupFileName != NULL && PathFileExists(backupFileName);
 	if (isSnapshotMode && !PathFileExists(longFileName)) // UNTITLED
 	{
-		lstrcpy(longFileName, fileName.c_str());
+		wcscpy_s(longFileName, fileName.c_str());
 	}
-
-
     _lastRecentFileList.remove(longFileName);
 
-    generic_string fileName2Find;
-	generic_string gs_fileName{fileName};
-    size_t res = gs_fileName.find_first_of(UNTITLED_STR);
+	generic_string fileName2Find;
+	generic_string gs_fileName{ fileName };
 
-    if (res != string::npos && res == 0)
-    {
-        fileName2Find = fileName;
-    }
-    else
-    {
-        fileName2Find = longFileName;
-    }
 
-    BufferID test = MainFileManager->getBufferFromName(fileName2Find.c_str());
-    if (test != BUFFER_INVALID && !isSnapshotMode)
+	// "fileName" could be:
+	// 1. full file path to open or create
+	// 2. "new N" or whatever renamed from "new N" to switch to (if user double-clicks the found entries of untitled documents, which is the results of running commands "Find in current doc" & "Find in opened docs")
+	// 3. a file name with relative path to open or create
+
+	// Search case 1 & 2 firstly
+	BufferID foundBufID = MainFileManager->getBufferFromName(fileName.c_str());
+
+	if (foundBufID == BUFFER_INVALID)
+		fileName2Find = longFileName;
+
+	// if case 1 & 2 not found, search case 3
+	if (foundBufID == BUFFER_INVALID)
+		foundBufID = MainFileManager->getBufferFromName(fileName2Find.c_str());
+
+	// If we found the document, then we don't open the existing doc. We return the found buffer ID instead.
+    if (foundBufID != BUFFER_INVALID && !isSnapshotMode)
     {
         if (_pTrayIco)
         {
@@ -185,7 +189,7 @@ BufferID Notepad_plus::doOpen(const generic_string& fileName, bool isRecursive, 
                 ::SendMessage(_pPublicInterface->getHSelf(), WM_SIZE, 0, 0);
             }
         }
-        return test;
+        return foundBufID;
     }
 
     if (isFileSession(longFileName) && PathFileExists(longFileName))
@@ -722,7 +726,7 @@ generic_string Notepad_plus::exts2Filters(generic_string exts) const
 
 	int j = 0;
 	bool stop = false;
-	for (size_t i = 0, len = exts.length(); i < len ; ++i)
+	for (size_t i = 0, len = exts.length(); i < len && j < MAX_PATH - 1; ++i)
 	{
 		if (extStr[i] == ' ')
 		{
@@ -904,7 +908,7 @@ bool Notepad_plus::fileCloseAll(bool doDeleteBackup, bool isSnapshotMode)
 				{
 					// warning user and save it if user want it.
 					activateBuffer(id, MAIN_VIEW);
-					if(!activateBuffer(id, SUB_VIEW))
+					if (!activateBuffer(id, SUB_VIEW))
 						switchEditViewTo(MAIN_VIEW);
 
 					int res = _nativeLangSpeaker.messageBox("NoBackupDoSaveFile",
@@ -930,7 +934,7 @@ bool Notepad_plus::fileCloseAll(bool doDeleteBackup, bool isSnapshotMode)
 			else
 			{
 				activateBuffer(id, MAIN_VIEW);
-				if(!activateBuffer(id, SUB_VIEW))
+				if (!activateBuffer(id, SUB_VIEW))
 					switchEditViewTo(MAIN_VIEW);
 
 				int res = doSaveOrNot(buf->getFullPathName());
@@ -1038,10 +1042,10 @@ bool Notepad_plus::fileCloseAllGiven(const std::vector<int> &krvecBufferIndexes)
 		}
 		else if (buf->isDirty())
 		{
-			if(_activeView == MAIN_VIEW)
+			if (_activeView == MAIN_VIEW)
 			{
 				activateBuffer(id, MAIN_VIEW);
-				if(!activateBuffer(id, SUB_VIEW))
+				if (!activateBuffer(id, SUB_VIEW))
 					switchEditViewTo(MAIN_VIEW);
 			}
 			else
@@ -1116,7 +1120,7 @@ bool Notepad_plus::fileCloseAllButCurrent()
 		else if (buf->isDirty())
 		{
 			activateBuffer(id, MAIN_VIEW);
-			if(!activateBuffer(id, SUB_VIEW))
+			if (!activateBuffer(id, SUB_VIEW))
 				switchEditViewTo(MAIN_VIEW);
 
 			int res = doSaveOrNot(buf->getFullPathName());
@@ -1403,17 +1407,59 @@ bool Notepad_plus::fileRename(BufferID id)
 	scnN.nmhdr.idFrom = (uptr_t)bufferID;
 	_pluginsManager.notify(&scnN);
 
-	FileDialog fDlg(_pPublicInterface->getHSelf(), _pPublicInterface->getHinst());
-
-    fDlg.setExtFilter(TEXT("All types"), TEXT(".*"), NULL);
-	setFileOpenSaveDlgFilters(fDlg);
-
-	fDlg.setDefFileName(buf->getFileName());
-	TCHAR *pfn = fDlg.doSaveDlg();
-
 	bool success = false;
-	if (pfn)
-		success = MainFileManager->moveFile(bufferID, pfn);
+	bool isFileExisting = PathFileExists(buf->getFullPathName()) != FALSE;
+	if (isFileExisting)
+	{
+		FileDialog fDlg(_pPublicInterface->getHSelf(), _pPublicInterface->getHinst());
+
+		fDlg.setExtFilter(TEXT("All types"), TEXT(".*"), NULL);
+		setFileOpenSaveDlgFilters(fDlg);
+
+		fDlg.setDefFileName(buf->getFileName());
+		TCHAR *pfn = fDlg.doSaveDlg();
+
+		if (pfn)
+			success = MainFileManager->moveFile(bufferID, pfn);
+	}
+	else
+	{
+		// We are just going to rename the tab nothing else
+		// So just rename the tab and rename the backup file too if applicable
+
+		// https://docs.microsoft.com/en-us/windows/desktop/FileIO/naming-a-file
+		// Reserved characters: < > : " / \ | ? *
+		std::wstring reservedChars = TEXT("<>:\"/\\|\?*");
+
+		generic_string title = _nativeLangSpeaker.getLocalizedStrFromID("tabrename-title", TEXT("Rename Current Tab"));
+		generic_string staticName = _nativeLangSpeaker.getLocalizedStrFromID("tabrename-newname", TEXT("New Name: "));
+
+		StringDlg strDlg;
+		strDlg.init(_pPublicInterface->getHinst(), _pPublicInterface->getHSelf(), title.c_str(), staticName.c_str(), buf->getFileName(), 0, reservedChars.c_str(), true);
+
+		TCHAR *tabNewName = reinterpret_cast<TCHAR *>(strDlg.doDialog());
+		if (tabNewName)
+		{
+			success = true;
+			buf->setFileName(tabNewName);
+			bool isSnapshotMode = NppParameters::getInstance()->getNppGUI().isSnapshotMode();
+			if (isSnapshotMode)
+			{
+				generic_string oldBackUpFile = buf->getBackupFileName();
+
+				// Change the backup file name and let MainFileManager decide the new filename
+				buf->setBackupFileName(TEXT(""));
+
+				// Create new backup
+				buf->setModifiedStatus(true);
+				bool bRes = MainFileManager->backupCurrentBuffer();
+
+				// Delete old backup
+				if (bRes)
+					::DeleteFile(oldBackUpFile.c_str());
+			}
+		}
+	}
 
 	scnN.nmhdr.code = success ? NPPN_FILERENAMED : NPPN_FILERENAMECANCEL;
 	_pluginsManager.notify(&scnN);

@@ -261,7 +261,7 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			_pEditView->getGenericSelectedText(str, strSize);
 			_findReplaceDlg.setSearchText(str);
 			if (isFirstTime)
-				_nativeLangSpeaker.changeDlgLang(_findReplaceDlg.getHSelf(), "Find");
+				_nativeLangSpeaker.changeFindReplaceDlgLang(_findReplaceDlg);
 			_findReplaceDlg.launchFindInFilesDlg();
 			setFindReplaceFolderFilter(reinterpret_cast<const TCHAR*>(wParam), reinterpret_cast<const TCHAR*>(lParam));
 
@@ -688,7 +688,8 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 		{
 			TCHAR str[MAX_PATH];
 			// par defaut : NPPM_GETCURRENTDIRECTORY
-			TCHAR *fileStr = lstrcpy(str, _pEditView->getCurrentBuffer()->getFullPathName());
+			wcscpy_s(str, _pEditView->getCurrentBuffer()->getFullPathName());
+			TCHAR* fileStr = str;
 
 			if (message == NPPM_GETCURRENTDIRECTORY)
 				PathRemoveFileSpec(str);
@@ -708,8 +709,6 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			{
 				if (lstrlen(fileStr) >= int(wParam))
 				{
-					// Not message for users so no translation
-					::MessageBox(hwnd, TEXT("Allocated buffer size is not enough to copy the string."), TEXT("NPPM error"), MB_OK);
 					return FALSE;
 				}
 			}
@@ -730,8 +729,6 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			{
 				if (lstrlen(str) >= int(wParam))	//buffer too small
 				{
-					// Not message for users so no translation
-					::MessageBox(hwnd, TEXT("Allocated buffer size is not enough to copy the string."), TEXT("NPPM_GETCURRENTWORD error"), MB_OK);
 					return FALSE;
 				}
 				else //buffer large enough, perform safe copy
@@ -787,8 +784,6 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 			if (lstrlen(str) >= int(wParam))	//buffer too small
 			{
-				// Not message for users so no translation
-				::MessageBox(hwnd, TEXT("Allocated buffer size is not enough to copy the string."), TEXT("NPPM_GETFILENAMEATCURSOR error"), MB_OK);
 				return FALSE;
 			}
 			else //buffer large enough, perform safe copy
@@ -815,8 +810,6 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			{
 				if (lstrlen(str) >= int(wParam))
 				{
-					// Not message for users so no translation
-					::MessageBox(hwnd, TEXT("Allocated buffer size is not enough to copy the string."), TEXT("NPPM_GETNPPDIRECTORY error"), MB_OK);
 					return FALSE;
 				}
 			}
@@ -1862,7 +1855,7 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		case WM_ENDSESSION:
 		{
-			if(wParam == TRUE)
+			if (wParam == TRUE)
 				::DestroyWindow(hwnd);
 			return 0;
 		}
@@ -2040,25 +2033,19 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 
 		case NPPM_GETPLUGINSCONFIGDIR:
 		{
-			if (!lParam || !wParam)
-				return FALSE;
+			generic_string userPluginConfDir = pNppParam->getUserPluginConfDir();
+			if (lParam != 0)
+			{
+				if (userPluginConfDir.length() >= static_cast<size_t>(wParam))
+				{
+					return 0;
+				}
+				lstrcpy(reinterpret_cast<TCHAR *>(lParam), userPluginConfDir.c_str());
 
-			generic_string pluginsConfigDirPrefix = pNppParam->getAppDataNppDir();
-
-			if (pluginsConfigDirPrefix == TEXT(""))
-				pluginsConfigDirPrefix = pNppParam->getNppPath();
-
-			const TCHAR *secondPart = TEXT("plugins\\Config");
-
-			size_t len = wParam;
-			if (len < pluginsConfigDirPrefix.length() + lstrlen(secondPart))
-				return FALSE;
-
-			TCHAR *pluginsConfigDir = reinterpret_cast<TCHAR *>(lParam);
-			lstrcpy(pluginsConfigDir, pluginsConfigDirPrefix.c_str());
-
-			::PathAppend(pluginsConfigDir, secondPart);
-			return TRUE;
+				// For the retro-compatibility
+				return TRUE;
+			}
+			return userPluginConfDir.length();
 		}
 
 		case NPPM_GETPLUGINHOMEPATH:
@@ -2068,8 +2055,6 @@ LRESULT Notepad_plus::process(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
 			{
 				if (pluginHomePath.length() >= static_cast<size_t>(wParam))
 				{
-					// Not message for users so no translation
-					::MessageBox(hwnd, TEXT("Allocated buffer size is not enough to copy the string."), TEXT("NPPM_GETPLUGINHOMEPATH error"), MB_OK);
 					return 0;
 				}
 				lstrcpy(reinterpret_cast<TCHAR *>(lParam), pluginHomePath.c_str());

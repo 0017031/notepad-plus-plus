@@ -67,31 +67,6 @@ SectionGroup "Plugins" Plugins
 !endif
 	${MementoSectionEnd}
 
-	${MementoSection} "Decent Spell-Checking" DSpellCheck
-        Call setPathAndOptions
-        
-		Delete "$INSTDIR\plugins\DSpellCheck.dll"
-		Delete "$INSTDIR\plugins\DSpellCheck\DSpellCheck.dll"
-		Delete "$PLUGIN_INST_PATH\DSpellCheck\DSpellCheck.dll"
-		
-		
-		SetOutPath "$PLUGIN_INST_PATH\DSpellCheck"
-!ifdef ARCH64
-		File "..\bin64\plugins\DSpellCheck\DSpellCheck.dll"
-		SetOutPath "$PLUGIN_CONF_PATH\Hunspell"
-		File "..\bin64\plugins\Config\Hunspell\en_US.aff"
-		File "..\bin64\plugins\Config\Hunspell\en_US.dic"
-!else
-		File "..\bin\plugins\DSpellCheck\DSpellCheck.dll"
-		SetOutPath "$PLUGIN_CONF_PATH\Hunspell"
-		File "..\bin\plugins\Config\Hunspell\en_US.aff"
-		File "..\bin\plugins\Config\Hunspell\en_US.dic"
-!endif
-        SetOverwrite off
-        SetOutPath "$UPDATE_PATH\plugins\Config"
-        File "..\bin\plugins\Config\DSpellCheckDefaultDisabled\DSpellCheck.ini"
-	${MementoSectionEnd}
-
 SectionGroupEnd
 
 ${MementoSection} "Auto-Updater" AutoUpdater
@@ -114,11 +89,11 @@ ${MementoSectionEnd}
 
 ${MementoSection} "Plugins Admin" PluginsAdmin
 	SetOverwrite on
-	SetOutPath $PLUGIN_CONF_PATH
+	SetOutPath $ALLUSERS_PLUGIN_CONF_PATH
 !ifdef ARCH64
-	File "..\bin64\nppPluginList.dll"
+	File "..\bin64\plugins\Config\nppPluginList.dll"
 !else
-	File "..\bin\nppPluginList.dll"
+	File "..\bin\plugins\Config\nppPluginList.dll"
 !endif
 ${MementoSectionEnd}
 
@@ -128,6 +103,7 @@ SectionGroup un.Plugins
 		Delete "$INSTDIR\plugins\NppExport.dll"
 		Delete "$INSTDIR\plugins\NppExport\NppExport.dll"
 		RMDir "$INSTDIR\plugins\NppExport"
+
 		Delete "$PLUGIN_INST_PATH\NppExport\NppExport.dll"
 		RMDir "$PLUGIN_INST_PATH\NppExport"
 	SectionEnd
@@ -137,35 +113,30 @@ SectionGroup un.Plugins
 		Delete "$INSTDIR\plugins\NppConverter\NppConverter.dll"
 		RMDir "$INSTDIR\plugins\NppConverter"
 		Delete "$PLUGIN_INST_PATH\NppConverter\NppConverter.dll"
-		RMDir "PLUGIN_INST_PATH\NppConverter"
+		RMDir "$PLUGIN_INST_PATH\NppConverter"
 	SectionEnd
 	
 	Section un.MimeTools
 		Delete "$INSTDIR\plugins\mimeTools.dll"
 		Delete "$INSTDIR\plugins\mimeTools\mimeTools.dll"
 		RMDir "$INSTDIR\plugins\mimeTools"
-		Delete "PLUGIN_INST_PATH\mimeTools\mimeTools.dll"
+		Delete "$PLUGIN_INST_PATH\mimeTools\mimeTools.dll"
 		RMDir "$PLUGIN_INST_PATH\mimeTools"
 	SectionEnd
 
-	Section un.PluginManager
-		Delete "$INSTDIR\plugins\PluginManager.dll"
-		Delete "$UPDATE_PATH\plugins\Config\PluginManager.ini"
-		Delete "$INSTDIR\updater\gpup.exe"
-		RMDir "$INSTDIR\updater\"
-	SectionEnd
-	
  	Section un.DSpellCheck
+
 		Delete "$INSTDIR\plugins\DSpellCheck.dll"
 		Delete "$INSTDIR\plugins\DSpellCheck\DSpellCheck.dll"
+		Delete "$PLUGIN_INST_PATH\DSpellCheck\DSpellCheck.dll"
 		Delete "$UPDATE_PATH\plugins\Config\DSpellCheck.ini"
-		Delete "$PLUGIN_CONF_PATH\DSpellCheck.ini"
+		Delete "$ALLUSERS_PLUGIN_CONF_PATH\DSpellCheck.ini"
 		Delete "$INSTDIR\plugins\Config\Hunspell\en_US.aff"
-		Delete "$PLUGIN_CONF_PATH\Hunspell\en_US.aff"
+		Delete "$USER_PLUGIN_CONF_PATH\Hunspell\en_US.aff"
 		Delete "$INSTDIR\plugins\Config\Hunspell\en_US.dic"
-		Delete "$PLUGIN_CONF_PATH\Hunspell\en_US.dic"
+		Delete "$USER_PLUGIN_CONF_PATH\Hunspell\en_US.dic"
 		RMDir /r "$INSTDIR\plugins\Config"			; Remove Config folder recursively only if empty
-		RMDir /r "$PLUGIN_CONF_PATH\Config"			; Remove Config folder recursively only if empty
+		RMDir /r "$ALLUSERS_PLUGIN_CONF_PATH\Config"			; Remove Config folder recursively only if empty
 		RMDir "$INSTDIR\plugins\DSpellCheck"
 	SectionEnd
 
@@ -194,5 +165,6 @@ ${EndIf}
 FunctionEnd
 
 Section un.PluginsAdmin
-	Delete "$PLUGIN_CONF_PATH\nppPluginList.dll"
+	Delete "$USER_PLUGIN_CONF_PATH\nppPluginList.dll" ; delete 7.6 version's left
+	Delete "$ALLUSERS_PLUGIN_CONF_PATH\nppPluginList.dll"
 SectionEnd

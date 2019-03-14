@@ -421,8 +421,12 @@ int FindReplaceDlg::saveComboHistory(int id, int maxcount, vector<generic_string
 
     for (int i = 0 ; i < count ; ++i)
 	{
-		::SendMessage(hCombo, CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(text));
-        strings.push_back(generic_string(text));
+		auto cbTextLen = ::SendMessage(hCombo, CB_GETLBTEXTLEN, i, 0);
+		if (cbTextLen <= FINDREPLACE_MAXLENGTH - 1)
+		{
+			::SendMessage(hCombo, CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(text));
+			strings.push_back(generic_string(text));
+		}
 	}
     return count;
 }
@@ -1277,11 +1281,11 @@ INT_PTR CALLBACK FindReplaceDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM
 						{
 							if (nbMarked == 1)
 							{
-								result = pNativeSpeaker->getLocalizedStrFromID("find-status-mark-1-match", TEXT("1 match."));
+								result = pNativeSpeaker->getLocalizedStrFromID("find-status-mark-1-match", TEXT("Mark: 1 match."));
 							}
 							else
 							{
-								result = pNativeSpeaker->getLocalizedStrFromID("find-status-mark-nb-matches", TEXT("$INT_REPLACE$ matches."));
+								result = pNativeSpeaker->getLocalizedStrFromID("find-status-mark-nb-matches", TEXT("Mark: $INT_REPLACE$ matches."));
 								result = stringReplace(result, TEXT("$INT_REPLACE$"), std::to_wstring(nbMarked));
 							}
 						}
@@ -1492,7 +1496,7 @@ bool FindReplaceDlg::processFindNext(const TCHAR *txt2find, const FindOption *op
 
 	int stringSizeFind = lstrlen(txt2find);
 	TCHAR *pText = new TCHAR[stringSizeFind + 1];
-	lstrcpy(pText, txt2find);
+	wcscpy_s(pText, stringSizeFind + 1, txt2find);
 	
 	if (pOptions->_searchType == FindExtended) {
 		stringSizeFind = Searching::convertExtendedToString(txt2find, pText, stringSizeFind);
@@ -1867,13 +1871,13 @@ int FindReplaceDlg::processRange(ProcessOperation op, FindReplaceInfo & findRepl
 		generic_string str2Search = getTextFromCombo(hFindCombo);
 		stringSizeFind = str2Search.length();
 		pTextFind = new TCHAR[stringSizeFind + 1];
-		lstrcpy(pTextFind, str2Search.c_str());
+		wcscpy_s(pTextFind, stringSizeFind + 1, str2Search.c_str());
 	}
 	else
 	{
 		stringSizeFind = lstrlen(findReplaceInfo._txt2find);
 		pTextFind = new TCHAR[stringSizeFind + 1];
-		lstrcpy(pTextFind, findReplaceInfo._txt2find);
+		wcscpy_s(pTextFind, stringSizeFind + 1, findReplaceInfo._txt2find);
 	}
 
 	if (!pTextFind[0]) 
@@ -1891,13 +1895,13 @@ int FindReplaceDlg::processRange(ProcessOperation op, FindReplaceInfo & findRepl
 			generic_string str2Replace = getTextFromCombo(hReplaceCombo);
 			stringSizeReplace = str2Replace.length();
 			pTextReplace = new TCHAR[stringSizeReplace + 1];
-			lstrcpy(pTextReplace, str2Replace.c_str());
+			wcscpy_s(pTextReplace, stringSizeReplace + 1, str2Replace.c_str());
 		}
 		else
 		{
 			stringSizeReplace = lstrlen(findReplaceInfo._txt2replace);
 			pTextReplace = new TCHAR[stringSizeReplace + 1];
-			lstrcpy(pTextReplace, findReplaceInfo._txt2replace);
+			wcscpy_s(pTextReplace, stringSizeReplace + 1, findReplaceInfo._txt2replace);
 		}
 	}	
 
@@ -2180,7 +2184,7 @@ void FindReplaceDlg::findAllIn(InWhat op)
 		data.hIconTab = (HICON)::LoadImage(_hInst, MAKEINTRESOURCE(IDI_FIND_RESULT_ICON), IMAGE_ICON, 0, 0, LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT);
 		data.pszAddInfo = _findAllResultStr;
 
-		data.pszModuleName = TEXT("dummy");
+		data.pszModuleName = NPP_INTERNAL_FUCTION_STR;
 
 		// the dlgDlg should be the index of funcItem where the current function pointer is
 		// in this case is DOCKABLE_DEMO_INDEX
@@ -2239,7 +2243,7 @@ void FindReplaceDlg::findAllIn(InWhat op)
 
 	if (::SendMessage(_hParent, cmdid, 0, 0))
 	{
-		if(_findAllResult == 1)
+		if (_findAllResult == 1)
 			wsprintf(_findAllResultStr, TEXT("1 hit"));
 		else
 			wsprintf(_findAllResultStr, TEXT("%s hits"), commafyInt(_findAllResult).c_str());
@@ -2272,7 +2276,7 @@ Finder * FindReplaceDlg::createFinder()
 	data.hIconTab = (HICON)::LoadImage(_hInst, MAKEINTRESOURCE(IDI_FIND_RESULT_ICON), IMAGE_ICON, 0, 0, LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT);
 	data.pszAddInfo = _findAllResultStr;
 
-	data.pszModuleName = TEXT("dummy");
+	data.pszModuleName = NPP_INTERNAL_FUCTION_STR;
 
 	// the dlgDlg should be the index of funcItem where the current function pointer is
 	// in this case is DOCKABLE_DEMO_INDEX
@@ -2706,19 +2710,15 @@ void FindReplaceDlg::execSavedCommand(int cmd, uptr_t intValue, generic_string s
 						}
 						else
 						{
-							TCHAR moreInfo[128];
-							NativeLangSpeaker *pNativeSpeaker = (NppParameters::getInstance())->getNativeLangSpeaker();
-							generic_string msg = pNativeSpeaker->getLocalizedStrFromID("find-status-invalid-re", TEXT("Find: Invalid regular expression"));
-							if (nbMarked <= 1)
+							if (nbMarked == 1)
 							{
-								result = pNativeSpeaker->getLocalizedStrFromID("find-status-mark-1-match", TEXT("1 match."));
+								result = pNativeSpeaker->getLocalizedStrFromID("find-status-mark-1-match", TEXT("Mark: 1 match."));
 							}
 							else
 							{
-								result = pNativeSpeaker->getLocalizedStrFromID("find-status-mark-nb-matches", TEXT("$INT_REPLACE$ matches."));
+								result = pNativeSpeaker->getLocalizedStrFromID("find-status-mark-nb-matches", TEXT("Mark: $INT_REPLACE$ matches."));
 								result = stringReplace(result, TEXT("$INT_REPLACE$"), std::to_wstring(nbMarked));
 							}
-							result = moreInfo;
 						}
 
 						setStatusbarMessage(result, FSMessage);
@@ -2737,7 +2737,7 @@ void FindReplaceDlg::execSavedCommand(int cmd, uptr_t intValue, generic_string s
 				throw std::runtime_error("Internal error: unknown SnR command!");
 		}
 	}
-	catch (std::runtime_error err)
+	catch (const std::runtime_error& err)
 	{
 		MessageBoxA(NULL, err.what(), "Play Macro Exception", MB_OK);
 	}
@@ -2982,7 +2982,7 @@ void Finder::addFileNameTitle(const TCHAR * fileName)
 void Finder::addFileHitCount(int count)
 {
 	TCHAR text[20];
-	if(count == 1)
+	if (count == 1)
 		wsprintf(text, TEXT(" (1 hit)"));
 	else
 		wsprintf(text, TEXT(" (%i hits)"), count);
@@ -2996,13 +2996,13 @@ void Finder::addSearchHitCount(int count, bool isMatchLines)
 {
 	const TCHAR *moreInfo = isMatchLines ? TEXT(" - Line Filter Mode: only display the filtered results") :TEXT("");
 	TCHAR text[100];
-	if(count == 1 && _nbFoundFiles == 1)
+	if (count == 1 && _nbFoundFiles == 1)
 		wsprintf(text, TEXT(" (1 hit in 1 file%s)"), moreInfo);
-	else if(count == 1 && _nbFoundFiles != 1)
+	else if (count == 1 && _nbFoundFiles != 1)
 		wsprintf(text, TEXT(" (1 hit in %i files%s)"), _nbFoundFiles, moreInfo);
-	else if(count != 1 && _nbFoundFiles == 1)
+	else if (count != 1 && _nbFoundFiles == 1)
 		wsprintf(text, TEXT(" (%i hits in 1 file%s)"), count, moreInfo);
-	else if(count != 1 && _nbFoundFiles != 1)
+	else if (count != 1 && _nbFoundFiles != 1)
 		wsprintf(text, TEXT(" (%i hits in %i files%s)"), count, _nbFoundFiles, moreInfo);
 	setFinderReadOnly(false);
 	_scintView.insertGenericTextFrom(_lastSearchHeaderPos, text);
@@ -3558,7 +3558,7 @@ void FindIncrementDlg::setFindStatus(FindStatus iStatus, int nbCounted)
 
 void FindIncrementDlg::addToRebar(ReBar * rebar) 
 {
-	if(_pRebar)
+	if (_pRebar)
 		return;
 
 	_pRebar = rebar;

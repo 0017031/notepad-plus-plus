@@ -205,14 +205,14 @@ HMODULE loadSciLexerDll()
 	// Do not check dll signature if npp is running in debug mode
 	// This is helpful for developers to skip signature checking
 	// while analyzing issue or modifying the lexer dll
-//#ifndef _DEBUG
-#if 0
-	bool isOK = VerifySignedLibrary(sciLexerPath, NPP_COMPONENT_SIGNER_KEY_ID, NPP_COMPONENT_SIGNER_SUBJECT, NPP_COMPONENT_SIGNER_DISPLAY_NAME, false, false);
+#if 0 //ndef _DEBUG
+	SecurityGard securityGard;
+	bool isOK = securityGard.checkModule(sciLexerPath, nm_scilexer);
 
 	if (!isOK)
 	{
 		::MessageBox(NULL,
-			TEXT("Authenticode check failed: signature or signing certificate are not recognized"),
+			TEXT("Authenticode check failed:\rsigning certificate or hash is not recognized"),
 			TEXT("Library verification failed"),
 			MB_OK | MB_ICONERROR);
 		return nullptr;
@@ -397,6 +397,14 @@ LRESULT ScintillaEditView::scintillaNew_Proc(HWND hwnd, UINT Message, WPARAM wPa
 				return TRUE;
 			}
 
+			if (LOWORD(wParam) & MK_SHIFT) {
+				// move 3 columns at a time
+				::CallWindowProc(_scintillaDefaultProc, hwnd, WM_HSCROLL, ((short)HIWORD(wParam) < 0) ? SB_LINERIGHT : SB_LINELEFT, NULL);
+				::CallWindowProc(_scintillaDefaultProc, hwnd, WM_HSCROLL, ((short)HIWORD(wParam) < 0) ? SB_LINERIGHT : SB_LINELEFT, NULL);
+				::CallWindowProc(_scintillaDefaultProc, hwnd, WM_HSCROLL, ((short)HIWORD(wParam) < 0) ? SB_LINERIGHT : SB_LINELEFT, NULL);
+				return TRUE;
+			}
+
 			//Have to perform the scroll first, because the first/last line do not get updated untill after the scroll has been parsed
 			LRESULT scrollResult = ::CallWindowProc(_scintillaDefaultProc, hwnd, Message, wParam, lParam);
 			return scrollResult;
@@ -544,7 +552,7 @@ void ScintillaEditView::setSpecialStyle(const Style & styleToSet)
 void ScintillaEditView::setHotspotStyle(Style& styleToSet)
 {
 	StyleMap* styleMap;
-	if( _hotspotStyles.find(_currentBuffer) == _hotspotStyles.end() )
+	if ( _hotspotStyles.find(_currentBuffer) == _hotspotStyles.end() )
 	{
 		_hotspotStyles[_currentBuffer] = new StyleMap;
 	}
@@ -2121,7 +2129,7 @@ TCHAR * ScintillaEditView::getGenericWordOnCaretPos(TCHAR * txt, int size)
 	getWordOnCaretPos(txtA, size);
 
 	const TCHAR * txtW = wmc->char2wchar(txtA, cp);
-	lstrcpy(txt, txtW);
+	wcscpy_s(txt, size, txtW);
 	delete [] txtA;
 	return txt;
 }
@@ -2152,7 +2160,7 @@ TCHAR * ScintillaEditView::getGenericSelectedText(TCHAR * txt, int size, bool ex
 	getSelectedText(txtA, size, expand);
 
 	const TCHAR * txtW = wmc->char2wchar(txtA, cp);
-	lstrcpy(txt, txtW);
+	wcscpy_s(txt, size, txtW);
 	delete [] txtA;
 	return txt;
 }
@@ -2275,9 +2283,9 @@ void ScintillaEditView::beginOrEndSelect()
 
 void ScintillaEditView::updateBeginEndSelectPosition(const bool is_insert, const int position, const int length)
 {
-	if(_beginSelectPosition != -1 && position < _beginSelectPosition - 1)
+	if (_beginSelectPosition != -1 && position < _beginSelectPosition - 1)
 	{
-		if(is_insert)
+		if (is_insert)
 			_beginSelectPosition += length;
 		else
 			_beginSelectPosition -= length;
@@ -2825,7 +2833,7 @@ TCHAR * int2str(TCHAR *str, int strLen, int number, int base, int nbChiffre, boo
 			for ( ; *j != '\0' ; ++j)
 				if (*j == '1')
 					break;
-			lstrcpy(str, j);
+			wcscpy_s(str, strLen, j);
 		}
 		else
 		{
@@ -3324,7 +3332,7 @@ void ScintillaEditView::insertNewLineAboveCurrentLine()
 {
 	generic_string newline = getEOLString();
 	const auto current_line = getCurrentLineNumber();
-	if(current_line == 0)
+	if (current_line == 0)
 	{
 		// Special handling if caret is at first line.
 		insertGenericTextFrom(0, newline.c_str());
@@ -3344,7 +3352,7 @@ void ScintillaEditView::insertNewLineBelowCurrentLine()
 	generic_string newline = getEOLString();
 	const auto line_count = static_cast<size_t>(execute(SCI_GETLINECOUNT));
 	const auto current_line = getCurrentLineNumber();
-	if(current_line == line_count - 1)
+	if (current_line == line_count - 1)
 	{
 		// Special handling if caret is at last line.
 		appandGenericText(newline.c_str());

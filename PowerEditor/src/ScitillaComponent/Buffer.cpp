@@ -594,7 +594,7 @@ BufferID FileManager::loadFile(const TCHAR * filename, Document doc, int encodin
 	bool isSnapshotMode = backupFileName != NULL && PathFileExists(backupFileName);
 	if (isSnapshotMode && !PathFileExists(fullpath)) // if backup mode and fullpath doesn't exist, we guess is UNTITLED
 	{
-		lstrcpy(fullpath, filename); // we restore fullpath with filename, in our case is "new  #"
+		wcscpy_s(fullpath, MAX_PATH, filename); // we restore fullpath with filename, in our case is "new  #"
 	}
 
 	Utf8_16_Read UnicodeConvertor;	//declare here so we can get information after loading is done
@@ -884,7 +884,7 @@ bool FileManager::backupCurrentBuffer()
 				UnicodeConvertor.fclose();
 
 				// Note that fwrite() doesn't return the number of bytes written, but rather the number of ITEMS.
-				if(items_written == 1) // backup file has been saved
+				if (items_written == 1) // backup file has been saved
 				{
 					buffer->setModifiedStatus(false);
 					result = true;	//all done
@@ -1014,9 +1014,9 @@ bool FileManager::saveBuffer(BufferID id, const TCHAR * filename, bool isCopy, g
 
 		// Error, we didn't write the entire document to disk.
 		// Note that fwrite() doesn't return the number of bytes written, but rather the number of ITEMS.
-		if(items_written != 1)
+		if (items_written != 1)
 		{
-			if(error_msg != NULL)
+			if (error_msg != NULL)
 				*error_msg = TEXT("Failed to save file.\nNot enough space on disk to save file?");
 
 			return false;
@@ -1471,8 +1471,10 @@ int FileManager::getFileNameFromBuffer(BufferID id, TCHAR * fn2copy)
 		return -1;
 
 	Buffer* buf = getBufferByID(id);
+
 	if (fn2copy)
 		lstrcpy(fn2copy, buf->getFullPathName());
+
 	return lstrlen(buf->getFullPathName());
 }
 
