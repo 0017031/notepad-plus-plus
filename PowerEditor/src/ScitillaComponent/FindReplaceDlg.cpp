@@ -220,7 +220,7 @@ void Searching::displaySectionCentered(int posStart, int posEnd, ScintillaEditVi
 	pEditView->execute(SCI_SETANCHOR, posStart);	
 }
 
-LONG_PTR FindReplaceDlg::originalFinderProc = NULL;
+LONG_PTR FindReplaceDlg::originalFinderProc{};
 
 // important : to activate all styles
 const int STYLING_MASK = 255;

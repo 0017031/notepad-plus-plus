@@ -37,6 +37,7 @@
 #include "UserDefineDialog.h"
 #include "rgba_icons.h"
 
+#define CharacterRange Sci_CharacterRange
 
 #ifndef WM_MOUSEWHEEL
 #define WM_MOUSEWHEEL 0x020A
@@ -224,7 +225,7 @@ public:
 
 	LRESULT execute(UINT Msg, WPARAM wParam=0, LPARAM lParam=0) const {
 		try {
-			return _pScintillaFunc(_pScintillaPtr, Msg, wParam, lParam);
+		return _pScintillaFunc(_pScintillaPtr, Msg, wParam, lParam);
 		}
 		catch (...)
 		{
@@ -692,7 +693,7 @@ protected:
 	const char * getCompleteKeywordList(std::basic_string<char> & kwl, LangType langType, int keywordIndex);
 	void setKeywords(LangType langType, const char *keywords, int index);
 	void setLexer(int lexerID, LangType langType, int whichList);
-	inline void makeStyle(LangType langType, const TCHAR **keywordArray = NULL);
+	void makeStyle(LangType langType, const TCHAR **keywordArray = NULL);
 	void setStyle(Style styleToSet);			//NOT by reference	(style edited)
 	void setSpecialStyle(const Style & styleToSet);	//by reference
 	void setSpecialIndicator(const Style & styleToSet) {
