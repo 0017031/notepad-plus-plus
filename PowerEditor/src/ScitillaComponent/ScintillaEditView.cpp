@@ -205,9 +205,9 @@ HMODULE loadSciLexerDll()
 	// Do not check dll signature if npp is running in debug mode
 	// This is helpful for developers to skip signature checking
 	// while analyzing issue or modifying the lexer dll
-#if 0 //ndef _DEBUG
-	SecurityGard securityGard;
-	bool isOK = securityGard.checkModule(sciLexerPath, nm_scilexer);
+//#ifndef _DEBUG
+#if 0
+	bool isOK = VerifySignedLibrary(sciLexerPath, NPP_COMPONENT_SIGNER_KEY_ID, NPP_COMPONENT_SIGNER_SUBJECT, NPP_COMPONENT_SIGNER_DISPLAY_NAME, false, false);
 
 	if (!isOK)
 	{
@@ -2090,7 +2090,7 @@ void ScintillaEditView::getVisibleStartAndEndPosition(int * startPos, int * endP
 	auto lineCount = execute(SCI_GETLINECOUNT);
 	auto visibleLine = execute(SCI_DOCLINEFROMVISIBLE, firstVisibleLine + min(linesOnScreen, lineCount));
 	*endPos = static_cast<int32_t>(execute(SCI_POSITIONFROMLINE, visibleLine));
-	if (*endPos == -1)
+	if (*endPos == -1) 
 		*endPos = static_cast<int32_t>(execute(SCI_GETLENGTH));
 }
 
@@ -2604,7 +2604,7 @@ void ScintillaEditView::changeCase(__inout wchar_t * const strWToConvert, const 
 				//*(strWToConvert+i)  = wchar_t(std::towupper(*(strWToConvert+i)))    ;
 				strWToConvert[i] = static_cast<wchar_t>(std::towupper(static_cast<wint_t>(strWToConvert[i])));
 			}
-			break;
+			break; 
 		} //case UPPERCASE
 		case LOWERCASE:
 		{
@@ -2612,7 +2612,7 @@ void ScintillaEditView::changeCase(__inout wchar_t * const strWToConvert, const 
 			{
 				strWToConvert[i] = static_cast<wchar_t>(std::towlower(static_cast<wint_t>(strWToConvert[i])));
 			}
-			break;
+			break; 
 		} //case LOWERCASE
 		case TITLECASE_FORCE:
 		case TITLECASE_BLEND:
@@ -2630,7 +2630,7 @@ void ScintillaEditView::changeCase(__inout wchar_t * const strWToConvert, const 
 						strWToConvert[i] = static_cast<wchar_t>(std::towlower(static_cast<wint_t>(strWToConvert[i])));
 				}
 			}
-			break;
+			break; 
 		} //case TITLECASE
 		case SENTENCECASE_FORCE:
 		case SENTENCECASE_BLEND:
@@ -2694,7 +2694,7 @@ void ScintillaEditView::changeCase(__inout wchar_t * const strWToConvert, const 
 				else
 					strWToConvert[i] = static_cast<wchar_t>(std::towlower(static_cast<wint_t>(strWToConvert[i])));
 			}
-			break;
+			break; 
 		} //case INVERTCASE
 		case RANDOMCASE:
 		{
@@ -2708,7 +2708,7 @@ void ScintillaEditView::changeCase(__inout wchar_t * const strWToConvert, const 
 						strWToConvert[i] = static_cast<wchar_t>(std::towlower(static_cast<wint_t>(strWToConvert[i])));
 				}
 			}
-			break;
+			break; 
 		} //case RANDOMCASE
 	} //switch (caseToConvert)
 }

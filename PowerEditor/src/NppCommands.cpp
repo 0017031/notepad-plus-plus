@@ -95,10 +95,10 @@ void Notepad_plus::command(int id)
 			cmd.run(_pPublicInterface->getHSelf());
 		}
 		break;
-		
+
 		case IDM_FILE_OPEN_DEFAULT_VIEWER:
 		{
-			// Opens file in its default viewer. 
+			// Opens file in its default viewer.
             // Has the same effect as double–clicking this file in Windows Explorer.
             BufferID buf = _pEditView->getCurrentBufferID();
 			HINSTANCE res = ::ShellExecute(NULL, TEXT("open"), buf->getFullPathName(), NULL, NULL, SW_SHOW);
@@ -118,7 +118,7 @@ void Notepad_plus::command(int id)
 				errorMsg += TEXT("\nError Code: ");
 				errorMsg += intToString(retResult);
 				errorMsg += TEXT("\n----------------------------------------------------------");
-				
+
 				::MessageBox(_pPublicInterface->getHSelf(), errorMsg.c_str(), TEXT("ShellExecute - ERROR"), MB_ICONINFORMATION | MB_APPLMODAL);
 			}
 		}
@@ -399,7 +399,7 @@ void Notepad_plus::command(int id)
 			HWND hwnd = _pPublicInterface->getHSelf();
 			TCHAR curentWord[CURRENTWORD_MAXLENGTH];
 			::SendMessage(hwnd, NPPM_GETFILENAMEATCURSOR, CURRENTWORD_MAXLENGTH, reinterpret_cast<LPARAM>(curentWord));
-			
+
 			TCHAR cmd2Exec[CURRENTWORD_MAXLENGTH];
 			if (id == IDM_EDIT_OPENINFOLDER)
 			{
@@ -491,7 +491,7 @@ void Notepad_plus::command(int id)
 			}
 
 			Command cmd(url.c_str());
-			cmd.run(_pPublicInterface->getHSelf());	
+			cmd.run(_pPublicInterface->getHSelf());
 		}
 		break;
 
@@ -1083,13 +1083,18 @@ void Notepad_plus::command(int id)
 
 		case IDM_FOCUS_ON_FOUND_RESULTS:
 		{
-			if (GetFocus() == _findReplaceDlg.getHFindResults())
-				// focus already on found results, switch to current edit view
+			// toggle display of finder
+			if(_findReplaceDlg.isFinderVisible())
+			{
+				_findReplaceDlg.hideFinder();
 				switchEditViewTo(currentView());
+			}
 			else
+			{
 				_findReplaceDlg.focusOnFinder();
 		}
 		break;
+ 		}
 
 		case IDM_SEARCH_VOLATILE_FINDNEXT :
 		case IDM_SEARCH_VOLATILE_FINDPREV :
@@ -1220,7 +1225,7 @@ void Notepad_plus::command(int id)
 			else // (id == IDM_SEARCH_GOPREVMARKER_DEF)
 				styleID = SCE_UNIVERSAL_FOUND_STYLE;
 
-			goToPreviousIndicator(styleID);	
+			goToPreviousIndicator(styleID);
 		}
 		break;
 
@@ -2038,7 +2043,7 @@ void Notepad_plus::command(int id)
 					{
 						// Monitoring firstly for making monitoring icon
 						monitoringStartOrStopAndUpdateUI(curBuf, true);
-						
+
 						MonitorInfo *monitorInfo = new MonitorInfo(curBuf, _pPublicInterface->getHSelf());
 						HANDLE hThread = ::CreateThread(NULL, 0, monitorFileOnChange, (void *)monitorInfo, 0, NULL); // will be deallocated while quitting thread
 						::CloseHandle(hThread);
@@ -2617,7 +2622,7 @@ void Notepad_plus::command(int id)
 					std::string md5ResultA = md5.digestString(selectedStr);
 					std::wstring md5ResultW(md5ResultA.begin(), md5ResultA.end());
 					str2Clipboard(md5ResultW, _pPublicInterface->getHSelf());
-					
+
 					delete [] selectedStr;
 				}
 			}
@@ -2687,36 +2692,6 @@ void Notepad_plus::command(int id)
 			if (textLen > maxSelLen)
 				doAboutDlg = true;
 
-			if (!doAboutDlg)
-			{
-				char author[maxSelLen+1] = "";
-				_pEditView->getSelectedText(author, maxSelLen + 1);
-				WcharMbcsConvertor *wmc = WcharMbcsConvertor::getInstance();
-				const wchar_t * authorW = wmc->char2wchar(author, _nativeLangSpeaker.getLangEncoding());
-				int iQuote = getQuoteIndexFrom(authorW);
-
-				if (iQuote == -1)
-				{
-					doAboutDlg = true;
-				}
-				else if (iQuote == -2)
-				{
-					generic_string noEasterEggsPath((NppParameters::getInstance())->getNppPath());
-					noEasterEggsPath.append(TEXT("\\noEasterEggs.xml"));
-					if (!::PathFileExists(noEasterEggsPath.c_str()))
-						showAllQuotes();
-					return;
-				}
-				if (iQuote != -1)
-				{
-					generic_string noEasterEggsPath((NppParameters::getInstance())->getNppPath());
-					noEasterEggsPath.append(TEXT("\\noEasterEggs.xml"));
-					if (!::PathFileExists(noEasterEggsPath.c_str()))
-						showQuoteFromIndex(iQuote);
-					return;
-				}
-			}
-
 			if (doAboutDlg)
 			{
 				bool isFirstTime = !_aboutDlg.isCreated();
@@ -2725,7 +2700,7 @@ void Notepad_plus::command(int id)
 				{
 					if (_nativeLangSpeaker.getLangEncoding() == NPP_CP_BIG5)
 					{
-						const char *authorName = "«J¤µ§^";
+						auto authorName = "«J¤µ§^"; //侯今吾
 						HWND hItem = ::GetDlgItem(_aboutDlg.getHSelf(), IDC_AUTHOR_NAME);
 
 						WcharMbcsConvertor *wmc = WcharMbcsConvertor::getInstance();

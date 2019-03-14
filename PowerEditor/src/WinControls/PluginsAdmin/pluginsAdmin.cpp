@@ -34,6 +34,7 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <uxtheme.h>
+#include <locale>
 #include "pluginsAdmin.h"
 #include "ScintillaEditView.h"
 #include "localization.h"
@@ -210,7 +211,7 @@ bool findStrNoCase(const generic_string & strHaystack, const generic_string & st
 	auto it = std::search(
 		strHaystack.begin(), strHaystack.end(),
 		strNeedle.begin(), strNeedle.end(),
-		[](TCHAR ch1, TCHAR ch2){return _totupper(ch1) == _totupper(ch2); }
+        [](auto ch1, auto ch2) {return std::toupper(ch1, locale()) == std::toupper(ch2, locale()); }
 	);
 	return (it != strHaystack.end());
 }
@@ -430,15 +431,12 @@ PluginsAdminDlg::PluginsAdminDlg()
 	PathAppend(_updaterFullPath, TEXT("gup.exe"));
 
 	// get plugin-list path
-	_pluginListFullPath = pNppParameters->getPluginConfDir();
-
-#ifdef DEBUG // if not debug, then it's release
-	// load from nppPluginList.json instead of nppPluginList.dll
-	PathAppend(_pluginListFullPath, TEXT("nppPluginList.json"));
-#else //RELEASE
-	PathAppend(_pluginListFullPath, TEXT("nppPluginList.dll"));
-#endif
+    _pluginListPathJson = pNppParameters->getPluginConfigPath();
+    PathAppend(_pluginListPathJson, TEXT("nppPluginList.json"));
+    _pluginListPathDLL = getPluginConfigPath();
+    PathAppend(_pluginListPathDLL, TEXT("nppPluginList.dll"));
 }
+
 
 bool PluginsAdminDlg::exitToInstallRemovePlugins(Operation op, const vector<PluginUpdateInfo*>& puis)
 {
@@ -689,40 +687,20 @@ typedef const char * (__cdecl * PFUNCGETPLUGINLIST)();
 
 bool PluginsAdminDlg::isValide()
 {
-	// GUP.exe doesn't work under XP
-	winVer winVersion = (NppParameters::getInstance())->getWinVersion();
-	if (winVersion <= WV_XP)
+    
+    if (!::PathFileExists(_pluginListPathDLL.c_str())
+        &&
+        !::PathFileExists(_pluginListPathJson.c_str()))
 	{
 		return false;
 	}
 
-	if (!::PathFileExists(_pluginListFullPath.c_str()))
-	{
-		return false;
-	}
-
+    //generic_string gupPath;
 	if (!::PathFileExists(_updaterFullPath.c_str()))
 	{
 		return false;
 	}
-
-#ifdef DEBUG // if not debug, then it's release
-	
 	return true;
-
-#else //RELEASE
-
-	// check the signature on default location : %APPDATA%\Notepad++\plugins\config\pl\nppPluginList.dll or NPP_INST_DIR\plugins\config\pl\nppPluginList.dll
-	
-	SecurityGard securityGard;
-	bool isOK = securityGard.checkModule(_pluginListFullPath, nm_pluginList);
-
-	if (!isOK)
-		return isOK;
-
-	isOK = securityGard.checkModule(_updaterFullPath, nm_gup);
-	return isOK;
-#endif
 }
 
 bool PluginsAdminDlg::updateListAndLoadFromJson()
@@ -736,16 +714,9 @@ bool PluginsAdminDlg::updateListAndLoadFromJson()
 
 		json j;
 
-#ifdef DEBUG // if not debug, then it's release
-
-		// load from nppPluginList.json instead of nppPluginList.dll
-		ifstream nppPluginListJson(_pluginListFullPath);
-		nppPluginListJson >> j;
-
-#else //RELEASE
-
-		hLib = ::LoadLibraryEx(_pluginListFullPath.c_str(), 0, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
-
+        if (PathFileExists(_pluginListPathDLL.c_str()))
+        {
+            hLib = ::LoadLibrary(_pluginListPathDLL.c_str());
 		if (!hLib)
 		{
 			// Error treatment
@@ -753,32 +724,27 @@ bool PluginsAdminDlg::updateListAndLoadFromJson()
 			return false;
 		}
 
-		HRSRC rc = ::FindResource(hLib, MAKEINTRESOURCE(IDR_PLUGINLISTJSONFILE), MAKEINTRESOURCE(TEXTFILE));
-		if (!rc)
+		PFUNCGETPLUGINLIST pGetListFunc = (PFUNCGETPLUGINLIST)GetProcAddress(hLib, "getList");
+		if (!pGetListFunc)
 		{
+			// Error treatment
+			//printStr(TEXT("getList PB!!!"));
 			::FreeLibrary(hLib);
 			return false;
 		}
 
-		HGLOBAL rcData = ::LoadResource(hLib, rc);
-		if (!rcData)
+		const char* pl = pGetListFunc();
+		//MessageBoxA(NULL, pl, "", MB_OK);
+
+		j = j.parse(pl);
+}
+        else
 		{
-			::FreeLibrary(hLib);
-			return false;
+            // load from nppPluginList.json instead of nppPluginList.dll
+            ifstream nppPluginListJson(_pluginListPathJson);
+            nppPluginListJson >> j;
 		}
-
-		auto size = ::SizeofResource(hLib, rc);
-		auto data = static_cast<const char*>(::LockResource(rcData));
-
-		char* buffer = new char[size + 1];
-		::memcpy(buffer, data, size);
-		buffer[size] = '\0';
-
-		j = j.parse(buffer);
-
-		delete[] buffer;
-
-#endif
+        //#endif
 		// if absent then download it
 
 

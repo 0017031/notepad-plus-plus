@@ -716,7 +716,8 @@ generic_string ThemeSwitcher::getThemeFromXmlFileName(const TCHAR *xmlFullPath) 
 	return fn;
 }
 
-
+#pragma warning( push )
+#pragma warning( disable : 4996)
 winVer NppParameters::getWindowsVersion()
 {
 	OSVERSIONINFOEX osvi;
@@ -819,6 +820,7 @@ winVer NppParameters::getWindowsVersion()
 
    return WV_UNKNOWN;
 }
+#pragma warning( pop )
 
 
 

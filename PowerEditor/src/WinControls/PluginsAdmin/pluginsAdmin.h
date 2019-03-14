@@ -51,7 +51,7 @@ struct Version
 	generic_string toString();
 	bool isNumber(const generic_string& s) const {
 		return !s.empty() && 
-			find_if(s.begin(), s.end(), [](_TCHAR c) { return !_istdigit(c); }) == s.end();
+            find_if(s.begin(), s.end(), [](_TCHAR c) { return !_istdigit(c); }) == s.end();
 	};
 
 	int compareTo(const Version& v2c) const;
@@ -95,12 +95,12 @@ struct PluginUpdateInfo
 
 struct NppCurrentStatus
 {
-	bool _isAdminMode;              // can launch gitup en Admin mode directly
+    bool _isAdminMode = false;              // can launch gitup en Admin mode directly
 
-	bool _isInProgramFiles;         // true: install/update/remove on "Program files" (ADMIN MODE)
+    bool _isInProgramFiles = false;         // true: install/update/remove on "Program files" (ADMIN MODE)
 									// false: install/update/remove on NPP_INST or install on %APPDATA%, update/remove on %APPDATA% & NPP_INST (NORMAL MODE)
 									
-	bool _isAppDataPluginsAllowed;  // true: install on %APPDATA%, update / remove on %APPDATA% & "Program files" or NPP_INST
+    bool _isAppDataPluginsAllowed = false;  // true: install on %APPDATA%, update / remove on %APPDATA% & "Program files" or NPP_INST
 
 	generic_string _nppInstallPath;
 	generic_string _appdataPath;
@@ -214,7 +214,8 @@ protected:
 private :
 	generic_string _updaterDir;
 	generic_string _updaterFullPath;
-	generic_string _pluginListFullPath;
+    generic_string _pluginListPathDLL;
+    generic_string _pluginListPathJson;
 
 	TabBar _tab;
 

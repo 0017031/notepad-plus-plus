@@ -224,52 +224,6 @@ int getNumberFromParam(char paramName, ParamVector & params, bool & isParamePres
 	return generic_atoi(numStr.c_str());
 };
 
-generic_string getEasterEggNameFromParam(ParamVector & params, unsigned char & type)
-{
-	generic_string EasterEggName;
-	if (!getParamValFromString(TEXT("-qn"), params, EasterEggName))  // get internal easter egg
-	{
-		if (!getParamValFromString(TEXT("-qt"), params, EasterEggName)) // get user quote from cmdline argument
-		{
-			if (!getParamValFromString(TEXT("-qf"), params, EasterEggName)) // get user quote from a content of file
-				return TEXT("");
-			else
-			{
-				EasterEggName = relativeFilePathToFullFilePath(EasterEggName.c_str());
-				type = 2; // quote content in file
-			}
-		}
-		else
-			type = 1; // commandline quote
-	}
-	else
-		type = 0; // easter egg
-
-	generic_string percentTwentyStr = TEXT("%20");
-	generic_string spaceStr = TEXT(" ");
-	size_t start_pos = 0;
-	while ((start_pos = EasterEggName.find(percentTwentyStr, start_pos)) != std::string::npos)
-	{
-		EasterEggName.replace(start_pos, percentTwentyStr.length(), spaceStr);
-		start_pos += spaceStr.length(); // Handles case where 'to' is a substring of 'from'
-	}
-
-	return EasterEggName;
-}
-
-int getGhostTypingSpeedFromParam(ParamVector & params)
-{
-	generic_string speedStr;
-	if (!getParamValFromString(TEXT("-qSpeed"), params, speedStr))
-		return -1;
-	
-	int speed = std::stoi(speedStr, 0);
-	if (speed <= 0 || speed > 3)
-		return -1;
-
-	return speed;
-}
-
 const TCHAR FLAG_MULTI_INSTANCE[] = TEXT("-multiInst");
 const TCHAR FLAG_NO_PLUGIN[] = TEXT("-noPlugin");
 const TCHAR FLAG_READONLY[] = TEXT("-ro");
@@ -350,8 +304,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 	cmdLineParams._isRecursive = isInList(FLAG_RECURSIVE, params);
 	cmdLineParams._langType = getLangTypeFromParam(params);
 	cmdLineParams._localizationPath = getLocalizationPathFromParam(params);
-	cmdLineParams._easterEggName = getEasterEggNameFromParam(params, cmdLineParams._quoteType);
-	cmdLineParams._ghostTypingSpeed = getGhostTypingSpeedFromParam(params);
 
 	// getNumberFromParam should be run at the end, to not consuming the other params
 	cmdLineParams._line2go = getNumberFromParam('n', params, isParamePresent);

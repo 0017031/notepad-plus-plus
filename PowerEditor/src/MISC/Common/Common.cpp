@@ -29,6 +29,7 @@
 #include <shlwapi.h>
 #include <shlobj.h>
 #include <uxtheme.h>
+#include <locale>
 #include <cassert>
 #include <codecvt>
 #include <locale>
@@ -777,14 +778,14 @@ COLORREF getCtrlBgColor(HWND hWnd)
 generic_string stringToUpper(generic_string strToConvert)
 {
     std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(), 
-        [](TCHAR ch){ return static_cast<TCHAR>(_totupper(ch)); }
-    );
+        [](auto c) {return std::toupper(c, std::locale()); });
     return strToConvert;
 }
 
 generic_string stringToLower(generic_string strToConvert)
 {
-    std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(), ::towlower);
+    std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(), 
+        [](auto c) {return std::tolower(c, std::locale()); });
     return strToConvert;
 }
 

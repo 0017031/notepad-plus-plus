@@ -225,7 +225,7 @@ public:
 
 	LRESULT execute(UINT Msg, WPARAM wParam=0, LPARAM lParam=0) const {
 		try {
-			return _pScintillaFunc(_pScintillaPtr, Msg, wParam, lParam);
+		return _pScintillaFunc(_pScintillaPtr, Msg, wParam, lParam);
 		}
 		catch (...)
 		{
@@ -966,7 +966,7 @@ protected:
 
 	void setREBOLLexer() {
 		setLexer(SCLEX_REBOL, L_REBOL, LIST_0 | LIST_1 | LIST_2 | LIST_3 | LIST_4 | LIST_5 | LIST_6);
-		execute(SCI_SETWORDCHARS, 0, reinterpret_cast<LPARAM>("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789?!.�+-*&|=_~"));
+		execute(SCI_SETWORDCHARS, 0, reinterpret_cast<LPARAM>("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789?!.'-*&|=_~"));
 	};
 
 	void setRegistryLexer() {
