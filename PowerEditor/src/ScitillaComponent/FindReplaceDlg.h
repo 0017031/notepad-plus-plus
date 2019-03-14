@@ -34,12 +34,14 @@
 #include "BoostRegexSearch.h"
 #include "StatusBar.h"
 
+//using SearchResultMarking=SCNotification::SearchResultMarking  ;
+
 #define FIND_RECURSIVE 1
 #define FIND_INHIDDENDIR 2
 
 #define FINDREPLACE_MAXLENGTH 2048
 
-enum DIALOG_TYPE {FIND_DLG, REPLACE_DLG, FINDINFILES_DLG, MARK_DLG};
+enum  DIALOG_TYPE {FIND_DLG, REPLACE_DLG, FINDINFILES_DLG, MARK_DLG};
 
 #define DIR_DOWN true
 #define DIR_UP false

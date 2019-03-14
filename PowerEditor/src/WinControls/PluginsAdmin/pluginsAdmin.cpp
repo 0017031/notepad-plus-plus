@@ -210,7 +210,7 @@ bool findStrNoCase(const generic_string & strHaystack, const generic_string & st
 	auto it = std::search(
 		strHaystack.begin(), strHaystack.end(),
 		strNeedle.begin(), strNeedle.end(),
-		[](TCHAR ch1, TCHAR ch2){return _totupper(ch1) == _totupper(ch2); }
+        [](auto ch1, auto ch2) {return std::toupper(ch1, locale()) == std::toupper(ch2, locale()); }
 	);
 	return (it != strHaystack.end());
 }
@@ -684,7 +684,7 @@ typedef const char * (__cdecl * PFUNCGETPLUGINLIST)();
 
 bool PluginsAdminDlg::isValide()
 {
-
+    
     if (!::PathFileExists(_pluginListPathDLL.c_str())
         &&
         !::PathFileExists(_pluginListPathJson.c_str()))
@@ -710,16 +710,9 @@ bool PluginsAdminDlg::updateListAndLoadFromJson()
 
 		json j;
 
-#ifdef DEBUG // if not debug, then it's release
-
-		// load from nppPluginList.json instead of nppPluginList.dll
-		ifstream nppPluginListJson(_pluginListFullPath);
-		nppPluginListJson >> j;
-
-#else //RELEASE
-
-		hLib = ::LoadLibraryEx(_pluginListFullPath.c_str(), 0, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
-
+        if (PathFileExists(_pluginListPathDLL.c_str()))
+        {
+            hLib = ::LoadLibrary(_pluginListPathDLL.c_str());
 		if (!hLib)
 		{
 			// Error treatment
@@ -727,9 +720,11 @@ bool PluginsAdminDlg::updateListAndLoadFromJson()
 			return false;
 		}
 
-		HRSRC rc = ::FindResource(hLib, MAKEINTRESOURCE(IDR_PLUGINLISTJSONFILE), MAKEINTRESOURCE(TEXTFILE));
-		if (!rc)
+		PFUNCGETPLUGINLIST pGetListFunc = (PFUNCGETPLUGINLIST)GetProcAddress(hLib, "getList");
+		if (!pGetListFunc)
 		{
+			// Error treatment
+			//printStr(TEXT("getList PB!!!"));
 			::FreeLibrary(hLib);
 			return false;
 		}
@@ -740,11 +735,11 @@ bool PluginsAdminDlg::updateListAndLoadFromJson()
 		j = j.parse(pl);
 }
         else
-		{
+        {
             // load from nppPluginList.json instead of nppPluginList.dll
             ifstream nppPluginListJson(_pluginListPathJson);
             nppPluginListJson >> j;
-		}
+        }
         //#endif
 		// if absent then download it
 
