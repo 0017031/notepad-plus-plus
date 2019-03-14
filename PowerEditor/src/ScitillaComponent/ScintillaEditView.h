@@ -486,7 +486,7 @@ public:
 		long length = 0;
 		while(*c != '\0')
 		{
-			if( (*c & 0xC0) != 0x80)
+			if ( (*c & 0xC0) != 0x80)
 				++length;
 			++c;
 		}

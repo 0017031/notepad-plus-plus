@@ -157,8 +157,27 @@ BufferID Notepad_plus::doOpen(const generic_string& fileName, bool isRecursive, 
 	}
     _lastRecentFileList.remove(longFileName);
 
-    BufferID test = MainFileManager->getBufferFromName(longFileName);
-    if (test != BUFFER_INVALID && !isSnapshotMode)
+	generic_string fileName2Find;
+	generic_string gs_fileName{ fileName };
+
+
+	// "fileName" could be:
+	// 1. full file path to open or create
+	// 2. "new N" or whatever renamed from "new N" to switch to (if user double-clicks the found entries of untitled documents, which is the results of running commands "Find in current doc" & "Find in opened docs")
+	// 3. a file name with relative path to open or create
+
+	// Search case 1 & 2 firstly
+	BufferID foundBufID = MainFileManager->getBufferFromName(fileName.c_str());
+
+	if (foundBufID == BUFFER_INVALID)
+		fileName2Find = longFileName;
+
+	// if case 1 & 2 not found, search case 3
+	if (foundBufID == BUFFER_INVALID)
+		foundBufID = MainFileManager->getBufferFromName(fileName2Find.c_str());
+
+	// If we found the document, then we don't open the existing doc. We return the found buffer ID instead.
+    if (foundBufID != BUFFER_INVALID && !isSnapshotMode)
     {
         if (_pTrayIco)
         {
@@ -170,7 +189,7 @@ BufferID Notepad_plus::doOpen(const generic_string& fileName, bool isRecursive, 
                 ::SendMessage(_pPublicInterface->getHSelf(), WM_SIZE, 0, 0);
             }
         }
-        return test;
+        return foundBufID;
     }
 
     if (isFileSession(longFileName) && PathFileExists(longFileName))
@@ -889,7 +908,7 @@ bool Notepad_plus::fileCloseAll(bool doDeleteBackup, bool isSnapshotMode)
 				{
 					// warning user and save it if user want it.
 					activateBuffer(id, MAIN_VIEW);
-					if(!activateBuffer(id, SUB_VIEW))
+					if (!activateBuffer(id, SUB_VIEW))
 						switchEditViewTo(MAIN_VIEW);
 
 					int res = _nativeLangSpeaker.messageBox("NoBackupDoSaveFile",
@@ -915,7 +934,7 @@ bool Notepad_plus::fileCloseAll(bool doDeleteBackup, bool isSnapshotMode)
 			else
 			{
 				activateBuffer(id, MAIN_VIEW);
-				if(!activateBuffer(id, SUB_VIEW))
+				if (!activateBuffer(id, SUB_VIEW))
 					switchEditViewTo(MAIN_VIEW);
 
 				int res = doSaveOrNot(buf->getFullPathName());
@@ -1023,10 +1042,10 @@ bool Notepad_plus::fileCloseAllGiven(const std::vector<int> &krvecBufferIndexes)
 		}
 		else if (buf->isDirty())
 		{
-			if(_activeView == MAIN_VIEW)
+			if (_activeView == MAIN_VIEW)
 			{
 				activateBuffer(id, MAIN_VIEW);
-				if(!activateBuffer(id, SUB_VIEW))
+				if (!activateBuffer(id, SUB_VIEW))
 					switchEditViewTo(MAIN_VIEW);
 			}
 			else
@@ -1101,7 +1120,7 @@ bool Notepad_plus::fileCloseAllButCurrent()
 		else if (buf->isDirty())
 		{
 			activateBuffer(id, MAIN_VIEW);
-			if(!activateBuffer(id, SUB_VIEW))
+			if (!activateBuffer(id, SUB_VIEW))
 				switchEditViewTo(MAIN_VIEW);
 
 			int res = doSaveOrNot(buf->getFullPathName());
