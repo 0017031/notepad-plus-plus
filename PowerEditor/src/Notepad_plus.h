@@ -428,7 +428,7 @@ private:
 	void checkMacroState();
 	void checkSyncState();
 	void dropFiles(HDROP hdrop);
-	void checkModifiedDocument();
+	void checkModifiedDocument(bool bCheckOnlyCurrentBuffer);
 
     void getMainClientRect(RECT & rc) const;
 	void staticCheckMenuAndTB() const;

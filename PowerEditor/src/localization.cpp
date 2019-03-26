@@ -71,13 +71,14 @@ MenuPosition menuPos[] = {
 	{ 2, 21, -1, "search-jumpDown" },
 	{ 2, 23, -1, "search-bookmark" },
 
-	{ 3,  4, -1, "view-showSymbol" },
-	{ 3,  5, -1, "view-zoom" },
-	{ 3,  6, -1, "view-moveCloneDocument" },
-	{ 3,  7, -1, "view-tab" },
-	{ 3, 16, -1, "view-collapseLevel" },
-	{ 3, 17, -1, "view-uncollapseLevel" },
-	{ 3, 21, -1, "view-project" },
+	{ 3,  4, -1, "view-currentFileIn" },
+	{ 3,  6, -1, "view-showSymbol" },
+	{ 3,  7, -1, "view-zoom" },
+	{ 3,  8, -1, "view-moveCloneDocument" },
+	{ 3,  9, -1, "view-tab" },
+	{ 3, 18, -1, "view-collapseLevel" },
+	{ 3, 19, -1, "view-uncollapseLevel" },
+	{ 3, 23, -1, "view-project" },
 
 	{ 4,  5, -1, "encoding-characterSets" },
 	{ 4,  5,  0, "encoding-arabic" },
@@ -238,7 +239,7 @@ MenuPosition & getMenuPosition(const char *id)
 
 	int nbSubMenuPos = sizeof(menuPos)/sizeof(MenuPosition);
 
-	for(int i = 0; i < nbSubMenuPos; ++i) 
+	for (int i = 0; i < nbSubMenuPos; ++i) 
 	{
 		if (strcmp(menuPos[i]._id, id) == 0)
 			return menuPos[i];
@@ -1087,6 +1088,50 @@ bool NativeLangSpeaker::changeDlgLang(HWND hDlg, const char *dlgTagName, char *t
 				const wchar_t *nameW = wmc->char2wchar(name, _nativeLangEncoding);
 				::SetWindowText(hItem, nameW);
 			}
+		}
+	}
+
+	// Set the text of child control
+	for (TiXmlNodeA *childNode = dlgNode->FirstChildElement("ComboBox");
+		childNode;
+		childNode = childNode->NextSibling("ComboBox"))
+	{
+		std::vector<generic_string> comboElms;
+		TiXmlElementA *element = childNode->ToElement();
+		int id;
+		element->Attribute("id", &id);
+		HWND hCombo = ::GetDlgItem(hDlg, id);
+
+		if (hCombo)
+		{
+			for (TiXmlNodeA *gChildNode = childNode->FirstChildElement("Element");
+				gChildNode;
+				gChildNode = gChildNode->NextSibling("Element"))
+			{
+				TiXmlElementA *comBoelement = gChildNode->ToElement();
+				const char *name = comBoelement->Attribute("name");
+				const wchar_t *nameW = wmc->char2wchar(name, _nativeLangEncoding);
+				comboElms.push_back(nameW);
+			}
+		}
+
+		size_t count = ::SendMessage(hCombo, CB_GETCOUNT, 0, 0);
+		if (count == comboElms.size())
+		{
+			// get selected index
+			auto selIndex = ::SendMessage(hCombo, CB_GETCURSEL, 0, 0);
+
+			// remove all old items
+			::SendMessage(hCombo, CB_RESETCONTENT, 0, 0);
+
+			// add translated entries
+			for (const auto& i : comboElms)
+			{
+				::SendMessage(hCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(i.c_str()));
+			}
+
+			// restore selected index
+			::SendMessage(hCombo, CB_SETCURSEL, selIndex, 0);
 		}
 	}
 	return true;

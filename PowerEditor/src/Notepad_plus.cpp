@@ -2000,6 +2000,11 @@ void Notepad_plus::checkDocState()
 
 	enableCommand(IDM_FILE_OPEN_DEFAULT_VIEWER, isAssoCommandExisting(curBuf->getFullPathName()), MENU);
 
+	enableCommand(IDM_VIEW_IN_FIREFOX, isAssoCommandExisting(curBuf->getFullPathName()), MENU);
+	enableCommand(IDM_VIEW_IN_CHROME, isAssoCommandExisting(curBuf->getFullPathName()), MENU);
+	enableCommand(IDM_VIEW_IN_IE, isAssoCommandExisting(curBuf->getFullPathName()), MENU);
+	enableCommand(IDM_VIEW_IN_EDGE, isAssoCommandExisting(curBuf->getFullPathName()), MENU);
+
 	enableConvertMenuItems(curBuf->getEolFormat());
 	checkUnicodeMenuItems();
 	checkLangsMenu(-1);
@@ -3323,10 +3328,10 @@ void Notepad_plus::dropFiles(HDROP hdrop)
 	}
 }
 
-void Notepad_plus::checkModifiedDocument()
+void Notepad_plus::checkModifiedDocument(bool bCheckOnlyCurrentBuffer)
 {
 	//this will trigger buffer updates. If the status changes, Notepad++ will be informed and can do its magic
-	MainFileManager->checkFilesystemChanges();
+	MainFileManager->checkFilesystemChanges(bCheckOnlyCurrentBuffer);
 }
 
 void Notepad_plus::getMainClientRect(RECT &rc) const
@@ -3784,13 +3789,21 @@ bool Notepad_plus::activateBuffer(BufferID id, int whichOne)
 	}
 
 	notifyBufferActivated(id, whichOne);
+
+	bool isCurrBuffDetection = (NppParameters::getInstance()->getNppGUI()._fileAutoDetection & cdEnabledNew) ? true : false;
+	if (!reload && isCurrBuffDetection)
+	{
+		// Buffer has been activated, now check for file modification
+		// If enabled for current buffer
+		pBuf->checkFileState();
+	}
 	return true;
 }
 
 void Notepad_plus::performPostReload(int whichOne) {
 	NppParameters *pNppParam = NppParameters::getInstance();
 	const NppGUI & nppGUI = pNppParam->getNppGUI();
-	bool toEnd = (nppGUI._fileAutoDetection == cdAutoUpdateGo2end) || (nppGUI._fileAutoDetection == cdGo2end);
+	bool toEnd = (nppGUI._fileAutoDetection & cdGo2end) ? true : false;
 	if (!toEnd)
 		return;
 	if (whichOne == MAIN_VIEW) {
@@ -5120,7 +5133,7 @@ void Notepad_plus::notifyBufferChanged(Buffer * buffer, int mask)
 			}
 			case DOC_MODIFIED:	//ask for reloading
 			{
-				bool autoUpdate = (nppGUI._fileAutoDetection == cdAutoUpdate) || (nppGUI._fileAutoDetection == cdAutoUpdateGo2end);
+				bool autoUpdate = (nppGUI._fileAutoDetection & cdAutoUpdate) ? true : false;
 				if (!autoUpdate || buffer->isDirty())
 				{
 					prepareBufferChangedDialog(buffer);
