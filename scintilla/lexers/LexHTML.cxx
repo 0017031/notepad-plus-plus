@@ -421,6 +421,9 @@ static bool isWordCdata(unsigned int start, unsigned int end, Accessor &styler) 
 static int StateForScript(script_type scriptLanguage) {
 	int Result;
 	switch (scriptLanguage) {
+	case eScriptVBS:
+		Result = SCE_HB_START;
+		break;
 	case eScriptJS:
 		Result = SCE_HJ_START;
 		break;
@@ -440,7 +443,7 @@ static int StateForScript(script_type scriptLanguage) {
 		Result = SCE_H_COMMENT;
 		break;
 	default :
-		Result = SCE_HB_START;
+		Result = SCE_HJ_START;
 		break;
 	}
 	return Result;
@@ -621,7 +624,7 @@ static void ColouriseHyperTextDoc(unsigned int startPos, int length, int initSty
 		// property asp.default.language
 		//	Script in ASP code is initially assumed to be in JavaScript.
 		//	To change this to VBScript set asp.default.language to 2. Python is 3.
-		lineState |= styler.GetPropertyInt("asp.default.language", eScriptVBS) << 4;
+		lineState |= styler.GetPropertyInt("asp.default.language", eScriptJS) << 4;
 	}
 	script_mode inScriptType = script_mode((lineState >> 0) & 0x03); // 2 bits of scripting mode
 	bool tagOpened = (lineState >> 2) & 0x01; // 1 bit to know if we are in an opened tag

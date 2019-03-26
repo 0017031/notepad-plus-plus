@@ -231,7 +231,13 @@ static const WinMenuKeyDefinition winKeyDefs[] =
 				 
 	{ VK_NULL,    IDM_VIEW_ALWAYSONTOP,                         false, false, false, nullptr },
 	{ VK_F11,     IDM_VIEW_FULLSCREENTOGGLE,                    false, false, false, nullptr },
-	{VK_F12,      IDM_VIEW_POSTIT,                              false, false, false, nullptr },
+	{ VK_F12,     IDM_VIEW_POSTIT,                              false, false, false, nullptr },
+
+	{ VK_NULL,    IDM_VIEW_IN_FIREFOX,                          false, false, false, nullptr },
+	{ VK_NULL,    IDM_VIEW_IN_CHROME,                           false, false, false, nullptr },
+	{ VK_NULL,    IDM_VIEW_IN_IE,                               false, false, false, nullptr },
+	{ VK_NULL,    IDM_VIEW_IN_EDGE,                             false, false, false, nullptr },
+
 	{ VK_NULL,    IDM_VIEW_TAB_SPACE,                           false, false, false, nullptr },
 	{ VK_NULL,    IDM_VIEW_EOL,                                 false, false, false, nullptr },
 	{ VK_NULL,    IDM_VIEW_ALL_CHARACTERS,                      false, false, false, nullptr },
@@ -911,7 +917,7 @@ bool NppParameters::reloadStylers(TCHAR* stylePath)
 	getUserStylersFromXmlTree();
 
 	//  Reload plugin styles.
-	for( size_t i = 0; i < getExternalLexerDoc()->size(); ++i)
+	for ( size_t i = 0; i < getExternalLexerDoc()->size(); ++i)
 	{
 		getExternalLexerFromXmlTree( getExternalLexerDoc()->at(i) );
 	}
@@ -1779,7 +1785,7 @@ void NppParameters::initMenuKeys()
 {
 	int nbCommands = sizeof(winKeyDefs)/sizeof(WinMenuKeyDefinition);
 	WinMenuKeyDefinition wkd;
-	for(int i = 0; i < nbCommands; ++i)
+	for (int i = 0; i < nbCommands; ++i)
 	{
 		wkd = winKeyDefs[i];
 		Shortcut sc((wkd.specialName ? wkd.specialName : TEXT("")), wkd.isCtrl, wkd.isAlt, wkd.isShift, static_cast<unsigned char>(wkd.vKey));
@@ -1795,7 +1801,7 @@ void NppParameters::initScintillaKeys() {
 	ScintillaKeyDefinition skd;
 	int prevIndex = -1;
 	int prevID = -1;
-	for(int i = 0; i < nbCommands; ++i)
+	for (int i = 0; i < nbCommands; ++i)
 	{
 		skd = scintKeyDefs[i];
 		if (skd.functionId == prevID)
@@ -2366,7 +2372,7 @@ void NppParameters::feedShortcut(TiXmlNode *node)
 		{
 			//find the commandid that matches this Shortcut sc and alter it, push back its index in the modified list, if not present
 			size_t len = _shortcuts.size();
-			for(size_t i = 0; i < len; ++i)
+			for (size_t i = 0; i < len; ++i)
 			{
 				if (_shortcuts[i].getID() == (unsigned long)id)
 				{	//found our match
@@ -2478,7 +2484,7 @@ void NppParameters::feedPluginCustomizedCmds(TiXmlNode *node)
 
 		//Find the corresponding plugincommand and alter it, put the index in the list
 		size_t len = _pluginCommands.size();
-		for(size_t i = 0; i < len; ++i)
+		for (size_t i = 0; i < len; ++i)
 		{
 			PluginCmdShortcut & pscOrig = _pluginCommands[i];
 			if (!generic_strnicmp(pscOrig.getModuleName(), moduleName, lstrlen(moduleName)) && pscOrig.getInternalID() == internalID)
@@ -2618,10 +2624,14 @@ std::pair<unsigned char, unsigned char> NppParameters::feedUserLang(TiXmlNode *n
 		const TCHAR *name = (childNode->ToElement())->Attribute(TEXT("name"));
 		const TCHAR *ext = (childNode->ToElement())->Attribute(TEXT("ext"));
 		const TCHAR *udlVersion = (childNode->ToElement())->Attribute(TEXT("udlVersion"));
-		try {
-			if (!name || !name[0] || !ext)
-				throw std::runtime_error("NppParameters::feedUserLang : UserLang name is missing");
 
+		if (!name || !name[0] || !ext)
+		{
+			// UserLang name is missing, just ignore this entry
+			continue;
+		}
+
+		try {
 			if (!udlVersion)
 				_userLangArray[_nbUserLang] = new UserLangContainer(name, ext, TEXT(""));
 			else
@@ -3745,7 +3755,7 @@ TiXmlNode * NppParameters::getChildElementByAttribut(TiXmlNode *pere, const TCHA
 LangType NppParameters::getLangIDFromStr(const TCHAR *langName)
 {
 	int lang = static_cast<int32_t>(L_TEXT);
-	for(; lang < L_EXTERNAL; ++lang)
+	for (; lang < L_EXTERNAL; ++lang)
 	{
 		const TCHAR * name = ScintillaEditView::langNames[lang].lexerName;
 		if (!lstrcmp(name, langName)) //found lang?
@@ -3928,6 +3938,8 @@ generic_string NppParameters::getLocPathFromStr(const generic_string & localizat
 		return TEXT("vietnamese.xml");
 	if (localizationCode == TEXT("cy-gb"))
 		return TEXT("welsh.xml");
+	if (localizationCode == TEXT("zu") || localizationCode == TEXT("zu-za"))
+		return TEXT("zulu.xml");
 
 	return generic_string();
 }
@@ -4179,18 +4191,24 @@ void NppParameters::feedGUIParameters(TiXmlNode *node)
 				const TCHAR* val = n->Value();
 				if (val)
 				{
-					if (!lstrcmp(val, TEXT("yes")))
-						_nppGUI._fileAutoDetection = cdEnabled;
+					if (!lstrcmp(val, TEXT("yesOld")))
+						_nppGUI._fileAutoDetection = cdEnabledOld;
+					else if (!lstrcmp(val, TEXT("autoOld")))
+						_nppGUI._fileAutoDetection = (cdEnabledOld | cdAutoUpdate);
+					else if (!lstrcmp(val, TEXT("Update2EndOld")))
+						_nppGUI._fileAutoDetection = (cdEnabledOld | cdGo2end);
+					else if (!lstrcmp(val, TEXT("autoUpdate2EndOld")))
+						_nppGUI._fileAutoDetection = (cdEnabledOld | cdAutoUpdate | cdGo2end);
+					else if (!lstrcmp(val, TEXT("yes")))
+						_nppGUI._fileAutoDetection = cdEnabledNew;
 					else if (!lstrcmp(val, TEXT("auto")))
-						_nppGUI._fileAutoDetection = cdAutoUpdate;
+						_nppGUI._fileAutoDetection = (cdEnabledNew | cdAutoUpdate);
 					else if (!lstrcmp(val, TEXT("Update2End")))
-						_nppGUI._fileAutoDetection = cdGo2end;
+						_nppGUI._fileAutoDetection = (cdEnabledNew | cdGo2end);
 					else if (!lstrcmp(val, TEXT("autoUpdate2End")))
-						_nppGUI._fileAutoDetection = cdAutoUpdateGo2end;
-		 			else //(!lstrcmp(val, TEXT("no")))
+						_nppGUI._fileAutoDetection = (cdEnabledNew | cdAutoUpdate | cdGo2end);
+					else //(!lstrcmp(val, TEXT("no")))
 						_nppGUI._fileAutoDetection = cdDisabled;
-
-					_nppGUI._fileAutoDetectionOriginalValue = _nppGUI._fileAutoDetection;
 				}
 			}
 		}
@@ -5551,21 +5569,42 @@ void NppParameters::createXmlTreeFromGUIParams()
 	// <GUIConfig name="Auto-detection">yes</GUIConfig>	
 	{
 		const TCHAR *pStr = TEXT("no");
-		switch (_nppGUI._fileAutoDetection)
+
+		if (_nppGUI._fileAutoDetection & cdEnabledOld)
 		{
-		case cdEnabled:
-			pStr = TEXT("yes");
-			break;
-		case cdAutoUpdate:
-			pStr = TEXT("auto");
-			break;
-		case cdGo2end:
-			pStr = TEXT("Update2End");
-			break;
-		case cdAutoUpdateGo2end:
-			pStr = TEXT("autoUpdate2End");
-			break;
+			pStr = TEXT("yesOld");
+
+			if ((_nppGUI._fileAutoDetection & cdAutoUpdate) && (_nppGUI._fileAutoDetection & cdGo2end))
+			{
+				pStr = TEXT("autoUpdate2EndOld");
+			}
+			else if (_nppGUI._fileAutoDetection & cdAutoUpdate)
+			{
+				pStr = TEXT("autoOld");
+			}
+			else if (_nppGUI._fileAutoDetection & cdGo2end)
+			{
+				pStr = TEXT("Update2EndOld");
+			}
 		}
+		else if (_nppGUI._fileAutoDetection & cdEnabledNew)
+		{
+			pStr = TEXT("yes");
+
+			if ((_nppGUI._fileAutoDetection & cdAutoUpdate) && (_nppGUI._fileAutoDetection & cdGo2end))
+			{
+				pStr = TEXT("autoUpdate2End");
+			}
+			else if (_nppGUI._fileAutoDetection & cdAutoUpdate)
+			{
+				pStr = TEXT("auto");
+			}
+			else if (_nppGUI._fileAutoDetection & cdGo2end)
+			{
+				pStr = TEXT("Update2End");
+			}
+		}
+
 		TiXmlElement *GUIConfigElement = (newGUIRoot->InsertEndChild(TiXmlElement(TEXT("GUIConfig"))))->ToElement();
 		GUIConfigElement->SetAttribute(TEXT("name"), TEXT("Auto-detection"));
 		GUIConfigElement->InsertEndChild(TiXmlText(pStr));
@@ -6385,7 +6424,7 @@ void NppParameters::writeStyles(LexerStylerArray & lexersStylers, StyleArray & g
 		}
 	}
 
-	for(size_t x = 0; x < _pXmlExternalLexerDoc.size(); ++x)
+	for (size_t x = 0; x < _pXmlExternalLexerDoc.size(); ++x)
 	{
 		TiXmlNode *lexersRoot = ( _pXmlExternalLexerDoc[x]->FirstChild(TEXT("NotepadPlus")))->FirstChildElement(TEXT("LexerStyles"));
 		for (TiXmlNode *childNode = lexersRoot->FirstChildElement(TEXT("LexerType"));
@@ -6662,7 +6701,7 @@ void NppParameters::addUserModifiedIndex(size_t index)
 {
 	size_t len = _customizedShortcuts.size();
 	bool found = false;
-	for(size_t i = 0; i < len; ++i)
+	for (size_t i = 0; i < len; ++i)
 	{
 		if (_customizedShortcuts[i] == index)
 		{
@@ -6680,7 +6719,7 @@ void NppParameters::addPluginModifiedIndex(size_t index)
 {
 	size_t len = _pluginCustomizedCmds.size();
 	bool found = false;
-	for(size_t i = 0; i < len; ++i)
+	for (size_t i = 0; i < len; ++i)
 	{
 		if (_pluginCustomizedCmds[i] == index)
 		{
@@ -6698,7 +6737,7 @@ void NppParameters::addScintillaModifiedIndex(int index)
 {
 	size_t len = _scintillaModifiedKeyIndices.size();
 	bool found = false;
-	for(size_t i = 0; i < len; ++i)
+	for (size_t i = 0; i < len; ++i)
 	{
 		if (_scintillaModifiedKeyIndices[i] == index)
 		{

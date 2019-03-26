@@ -2252,11 +2252,17 @@ generic_string ScintillaEditView::getLine(size_t lineNumber)
 
 void ScintillaEditView::getLine(size_t lineNumber, TCHAR * line, int lineBufferLen)
 {
+	// make sure the buffer length is enough to get the whole line
+	auto lineLen = execute(SCI_LINELENGTH, lineNumber);
+	if (lineLen >= lineBufferLen)
+		return;
+
 	WcharMbcsConvertor *wmc = WcharMbcsConvertor::getInstance();
 	UINT cp = static_cast<UINT>(execute(SCI_GETCODEPAGE));
 	char *lineA = new char[lineBufferLen];
 	// From Scintilla documentation for SCI_GETLINE: "The buffer is not terminated by a 0 character."
 	memset(lineA, 0x0, sizeof(char) * lineBufferLen);
+	
 	execute(SCI_GETLINE, lineNumber, reinterpret_cast<LPARAM>(lineA));
 	const TCHAR *lineW = wmc->char2wchar(lineA, cp);
 	lstrcpyn(line, lineW, lineBufferLen);
@@ -2978,9 +2984,9 @@ void ScintillaEditView::columnReplace(ColumnModeInfos & cmi, int initial, int in
 	{
 		int curNumber = initial;
 		const size_t kiMaxSize = cmi.size();
-		while(numbers.size() < kiMaxSize)
+		while (numbers.size() < kiMaxSize)
 		{
-			for(int i = 0; i < repeat; i++)
+			for (int i = 0; i < repeat; i++)
 			{
 				numbers.push_back(curNumber);
 				if (numbers.size() >= kiMaxSize)
@@ -3127,7 +3133,7 @@ void ScintillaEditView::hideLines()
 
 	//remove any markers in between
 	int scope = 0;
-	for(int i = startLine; i <= endLine; ++i)
+	for (int i = startLine; i <= endLine; ++i)
 	{
 		auto state = execute(SCI_MARKERGET, i);
 		bool closePresent = ((state & (1 << MARK_HIDELINESEND)) != 0);	//check close first, then open, since close closes scope
@@ -3170,7 +3176,7 @@ bool ScintillaEditView::markerMarginClick(int lineNumber)
 	if (closePresent)
 	{
 		openPresent = false;
-		for(lineNumber--; lineNumber >= 0 && !openPresent; lineNumber--)
+		for (lineNumber--; lineNumber >= 0 && !openPresent; lineNumber--)
 		{
 			state = execute(SCI_MARKERGET, lineNumber);
 			openPresent = ((state & (1 << MARK_HIDELINESBEGIN | 1 << MARK_HIDELINESUNDERLINE)) != 0);
