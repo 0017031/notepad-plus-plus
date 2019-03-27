@@ -1,0 +1,4 @@
+[submodule "myScintilla"]
+	path = myScintilla
+	url = https://github.com/0017031/scintilla
+	branch = for-notepad++
