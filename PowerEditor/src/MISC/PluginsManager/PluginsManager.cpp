@@ -440,7 +440,7 @@ void PluginsManager::addInMenuFromPMIndex(int i) {
 HMENU PluginsManager::setMenu(HMENU hMenu, const TCHAR *menuName, bool enablePluginAdmin) {
 
 	enablePluginAdmin = true;
-    if (hasPlugins() || enablePluginAdmin) {
+    
 	const TCHAR *nom_menu = (menuName && menuName[0])?menuName:TEXT("&Plugins");
 	size_t nbPlugin = _pluginInfos.size();
 

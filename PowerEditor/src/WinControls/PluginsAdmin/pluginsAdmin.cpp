@@ -41,7 +41,7 @@
 #include "PluginsManager.h"
 #include "verifySignedFile.h"
 #include "LongRunningOperation.h"
-
+#include <experimental/filesystem>
 #define TEXTFILE        256
 #define IDR_PLUGINLISTJSONFILE  101
 
@@ -430,7 +430,7 @@ PluginsAdminDlg::PluginsAdminDlg()
 	PathAppend(_updaterFullPath, TEXT("gup.exe"));
 
 	// get plugin-list path
-    _pluginListPathDLL = _pluginListPathJson = pNppParameters->getPluginConfigPath();
+    _pluginListPathDLL = _pluginListPathJson = pNppParameters->getPluginConfDir();
     PathAppend(_pluginListPathJson, TEXT("nppPluginList.json"));
     PathAppend(_pluginListPathDLL, TEXT("nppPluginList.dll"));
 }
@@ -736,9 +736,10 @@ bool PluginsAdminDlg::updateListAndLoadFromJson()
 }
         else
         {
+        	auto mypath=std::experimental::filesystem::path{_pluginListPathJson};
             // load from nppPluginList.json instead of nppPluginList.dll
-            ifstream nppPluginListJson(_pluginListPathJson);
-            nppPluginListJson >> j;
+            ifstream nppPluginListJson(mypath.string());
+            nppPluginListJson >> j;   // nlohmann store json in std::string
         }
         //#endif
 		// if absent then download it

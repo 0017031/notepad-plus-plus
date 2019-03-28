@@ -27,24 +27,25 @@
 
 #include <windows.h>
 #include <shlwapi.h>
+#include <tchar.h>
 
 const int CMD_LEN = 512;
 const int PARAM_LEN = 1024;
-const char *NPP = "\\notepad++.exe";
-const char *FLAG_LEXER_HTML = "-lhtml ";
+const TCHAR *NPP = _TEXT("\\notepad++.exe");
+const TCHAR *FLAG_LEXER_HTML = _TEXT("-lhtml ");
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdShow)
+//int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE,  LPSTR  lpszCmdLine, int nCmdShow)
+int WINAPI wWinMain (HINSTANCE hInstance, HINSTANCE , LPWSTR lpszCmdLine,   int nShowCmd)
 {
-	char cmd[CMD_LEN];
-	::GetModuleFileName(NULL, cmd, CMD_LEN);
+	TCHAR cmd[CMD_LEN];
+	::GetModuleFileName(nullptr, cmd, CMD_LEN);
 	PathRemoveFileSpec(cmd);
-	strcat(cmd, NPP);
+	_tcscat(cmd, NPP);
 
-	char param[PARAM_LEN] = "";
-	
-	strcat(strcat(param, FLAG_LEXER_HTML), lpszCmdLine);
-	::MessageBox(NULL, param, "", MB_OK);
-	HINSTANCE hInst = ::ShellExecute(NULL, "open", cmd, param, ".", SW_SHOW);
+	TCHAR param[PARAM_LEN] = {};
+	_tcscat(_tcscat(param, FLAG_LEXER_HTML), lpszCmdLine);
+	::MessageBox(nullptr, param, _TEXT(""), MB_OK);
+	HINSTANCE hInst = ::ShellExecute(nullptr, _TEXT("open"), cmd, param, _TEXT("."), SW_SHOW);
 	return (UINT)0;
 }
 

@@ -1305,7 +1305,7 @@ int FindLongestLine(HDC hdc,TCHAR* text,SIZE* size)
      TCHAR *p;
 
 	 wcscpy_s(temptext,text);
-     p = generic_strtok(temptext, TEXT("\n"));
+     p = generic_strtok(temptext, _TEXT("\n"));
      while(p)
          {
           GetTextExtentPoint32(hdc,p,lstrlen(p),size);
@@ -1313,9 +1313,9 @@ int FindLongestLine(HDC hdc,TCHAR* text,SIZE* size)
               {
                longest=size->cx;
               }
-          p = generic_strtok('\0', TEXT("\n"));
+             p = generic_strtok(nullptr, _TEXT("\n"));
          }
-     return longest;
+    return longest;
 }
 
 

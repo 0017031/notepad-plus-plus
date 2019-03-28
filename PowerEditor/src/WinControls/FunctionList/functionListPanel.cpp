@@ -30,7 +30,7 @@
 #include "ScintillaEditView.h"
 #include "localization.h"
 #include <fstream>
-#include <filesystem>  
+#include <experimental/filesystem>
 using nlohmann::json;
 using namespace std;
 
@@ -295,9 +295,9 @@ bool FunctionListPanel::serialize(const generic_string & outputFilename)
 		}
 	}
 
-	auto myfile = std::filesystem::path(fname2write);
-//	std::ofstream file(myfile.c_str());
-	std::ofstream file(myfile);
+	auto myfile = std::experimental::filesystem::path(fname2write);
+	std::ofstream file(myfile.string().c_str());
+//	std::ofstream file(myfile);
 	file << my_jsonObj;
 
 	return true;

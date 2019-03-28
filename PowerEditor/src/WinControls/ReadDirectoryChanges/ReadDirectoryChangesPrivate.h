@@ -136,7 +136,7 @@ public:
 
 	CReadDirectoryChanges* m_pBase;
 
-	volatile DWORD m_nOutstandingRequests;
+	volatile LONG m_nOutstandingRequests;
 
 protected:
 

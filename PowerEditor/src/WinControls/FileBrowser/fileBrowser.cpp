@@ -583,7 +583,7 @@ BrowserNodeType FileBrowser::getNodeType(HTREEITEM hItem)
 		return browserNodeType_file;
 	}
 	// Root
-	else if (tvItem.lParam != NULL)
+	else if (tvItem.lParam != LPARAM{})
 	{
 		return browserNodeType_root;
 	}

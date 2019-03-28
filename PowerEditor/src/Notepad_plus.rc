@@ -231,7 +231,7 @@ BEGIN
         MENUITEM "&Open...",                         IDM_FILE_OPEN
         MENUITEM "Open Containing Folder &b",       IDM_FILE_OPEN_FOLDER
         MENUITEM "cmd he&re",            IDM_FILE_OPEN_CMD
-        MENUITEM "Open in Default Vie&wer"          IDM_FILE_OPEN_DEFAULT_VIEWER
+        //MENUITEM "Open in Default Vie&wer"          IDM_FILE_OPEN_DEFAULT_VIEWER
 		MENUITEM "Open Folder as Workspace...",      IDM_FILE_OPENFOLDERASWORSPACE
         MENUITEM "Reload from &Disk",                IDM_FILE_RELOAD
         MENUITEM "&Save",                            IDM_FILE_SAVE

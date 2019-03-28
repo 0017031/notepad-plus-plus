@@ -49,7 +49,7 @@ public:
 
     void push(C &c) {
         std::unique_lock<std::mutex> lock(mtx);
-        push_back(c);
+        this->push_back(c);
         lock.unlock();
 
         if (!::ReleaseSemaphore(m_hSemaphore, 1, NULL)) {
