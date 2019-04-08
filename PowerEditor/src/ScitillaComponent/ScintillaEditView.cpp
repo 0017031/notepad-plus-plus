@@ -1429,7 +1429,7 @@ void ScintillaEditView::defineDocType(LangType typeDoc)
     }
 	setSpecialIndicator(*pStyle);
 
-    // Il faut surtout faire un test ici avant d'exécuter SCI_SETCODEPAGE
+    // Il faut surtout faire un test ici avant d'exÃ©cuter SCI_SETCODEPAGE
     // Sinon y'aura un soucis de performance!
 	if (isCJK())
 	{
