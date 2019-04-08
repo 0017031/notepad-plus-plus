@@ -35,7 +35,7 @@ StaticDialog::~StaticDialog()
 	if (isCreated())
 	{
 		// Prevent run_dlgProc from doing anything, since its virtual
-		::SetWindowLongPtr(_hSelf, GWLP_USERDATA, NULL);
+		::SetWindowLongPtr(_hSelf, GWLP_USERDATA, LONG{});
 		destroy();
 	}
 }

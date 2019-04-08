@@ -27,7 +27,7 @@
 
 #pragma once
 
-#define NOTEPAD_PLUS_VERSION TEXT("v7.6.4_edge,vs2017")
+#define NOTEPAD_PLUS_VERSION TEXT("edge,mingw32")
 
 // should be X.Y : ie. if VERSION_DIGITALVALUE == 4, 7, 1, 0 , then X = 4, Y = 71
 // ex : #define VERSION_VALUE TEXT("5.63\0")

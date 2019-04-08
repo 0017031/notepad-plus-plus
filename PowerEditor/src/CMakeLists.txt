@@ -376,7 +376,7 @@ SET(rcFiles
 
 IF (WIN32)
     SET(option WIN32)
-    SET(win32_LIBRARIES comctl32 shlwapi dbghelp version crypt32 wintrust sensapi)
+    SET(win32_LIBRARIES comctl32 shlwapi dbghelp version crypt32 wintrust) #sensapi
     if (MSVC)
         #do not use for mingw builds
         SET(CMAKE_CXX_FLAGS "/EHa /MP /W4")
