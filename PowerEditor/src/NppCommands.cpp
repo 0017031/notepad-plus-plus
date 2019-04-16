@@ -492,7 +492,6 @@ void Notepad_plus::command(int id)
 
 				auto httpPos = url.find(TEXT("http://"));
 				auto httpsPos = url.find(TEXT("https://"));
-
 				if (url.empty() || (httpPos != 0 && httpsPos != 0)) // if string is not a url (for launching only browser)
 				{
 					url = TEXT("https://www.google.com/search?q=$(CURRENT_WORD)");
@@ -1268,10 +1267,10 @@ void Notepad_plus::command(int id)
 			if (selectedText[0] == '\0')
 			{
 				if (lstrlen(wordOnCaret) > 0)
-				{
+            {
 					_findReplaceDlg.markAll(wordOnCaret, styleID);
 				}
-			}
+            }
 			else
 			{
 				_findReplaceDlg.markAll(selectedText, styleID);
@@ -2050,7 +2049,7 @@ void Notepad_plus::command(int id)
 		case IDM_VIEW_POSTIT :
 		{
 			if (!_beforeSpecialView._isDistractionFree)
-				postItToggle();
+			postItToggle();
 		}
 		break;
 
@@ -2118,7 +2117,7 @@ void Notepad_plus::command(int id)
 
 					::ShellExecute(NULL, TEXT("open"), TEXT("shell:Appsfolder\\Microsoft.MicrosoftEdge_8wekyb3d8bbwe!MicrosoftEdge"), fullCurrentPath.c_str(), NULL, SW_SHOW);
 				} 
-				else 
+				else
 				{
 					_nativeLangSpeaker.messageBox("ViewInBrowser",
 						_pPublicInterface->getHSelf(),
@@ -2130,7 +2129,7 @@ void Notepad_plus::command(int id)
 			}
 		}
 		break;
-
+		
 		case IDM_VIEW_TAB_SPACE:
 		{
 			bool isChecked = !(::GetMenuState(_mainMenuHandle, IDM_VIEW_TAB_SPACE, MF_BYCOMMAND) == MF_CHECKED);
