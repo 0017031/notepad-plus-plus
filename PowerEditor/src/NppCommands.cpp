@@ -462,11 +462,10 @@ void Notepad_plus::command(int id)
 			if (nppGui._searchEngineChoice == nppGui.se_custom)
 			{
 				url = nppGui._searchEngineCustom;
-				remove_if(url.begin(), url.end(), _istspace);
-
+				url.erase(std::remove_if(url.begin(), url.end(), [](_TUCHAR x){return _istspace(x);}),
+						  url.end());
 				auto httpPos = url.find(TEXT("http://"));
 				auto httpsPos = url.find(TEXT("https://"));
-
 				if (url.empty() || (httpPos != 0 && httpsPos != 0)) // if string is not a url (for launching only browser)
 				{
 					url = TEXT("https://www.google.com/search?q=$(CURRENT_WORD)");
@@ -3091,7 +3090,7 @@ void Notepad_plus::command(int id)
 			}
 		}
         break;
-		
+
 		case IDM_LANG_OPENUDLDIR:
 		{
 			generic_string userDefineLangFolderPath = NppParameters::getInstance().getUserDefineLangFolderPath();
