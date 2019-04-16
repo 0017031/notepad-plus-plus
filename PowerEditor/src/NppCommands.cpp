@@ -988,8 +988,8 @@ void Notepad_plus::command(int id)
 			const NppGUI & nppGui = (NppParameters::getInstance()).getNppGUI();
 			if (!nppGui._stopFillingFindField)
 			{
-				_pEditView->getGenericSelectedText(str, strSize);
-				_findReplaceDlg.setSearchText(str);
+			_pEditView->getGenericSelectedText(str, strSize);
+			_findReplaceDlg.setSearchText(str);
 			}
 
 			setFindReplaceFolderFilter(NULL, NULL);
