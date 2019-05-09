@@ -1327,7 +1327,7 @@ LRESULT CALLBACK GridProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	TCHAR buffer[bufferLen];
 	int SelfIndex;
 	int ReturnValue;
-    HMENU SelfMenu;
+    // HMENU SelfMenu;
 	HINSTANCE hInst;
     int iDataType;
 
