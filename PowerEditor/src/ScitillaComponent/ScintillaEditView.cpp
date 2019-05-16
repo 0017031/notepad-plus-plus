@@ -205,7 +205,7 @@ HMODULE loadSciLexerDll()
 	// Do not check dll signature if npp is running in debug mode
 	// This is helpful for developers to skip signature checking
 	// while analyzing issue or modifying the lexer dll
-#ifndef _DEBUG
+#if 0 //ndef _DEBUG
 	SecurityGard securityGard;
 	bool isOK = securityGard.checkModule(sciLexerPath, nm_scilexer);
 
