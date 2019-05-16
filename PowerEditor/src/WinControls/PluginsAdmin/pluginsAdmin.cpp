@@ -716,7 +716,7 @@ bool PluginsAdminDlg::isValide()
 		return false;
 	}
 
-#ifdef DEBUG // if not debug, then it's release
+#if 1 //def DEBUG // if not debug, then it's release
 	
 	return true;
 
