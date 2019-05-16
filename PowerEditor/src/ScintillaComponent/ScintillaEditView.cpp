@@ -178,16 +178,16 @@ int getNbDigits(int aNum, int base)
 void ScintillaEditView::init(HINSTANCE hInst, HWND hPere)
 {
 	if (!_SciInit)
-	{
+{
 		if (!Scintilla_RegisterClasses(hInst))
-		{
+	{
 			throw std::runtime_error("ScintillaEditView::init : SCINTILLA ERROR - Scintilla_RegisterClasses failed");
-		}
+}
 		_SciInit = true;
 	}
 
 	Window::init(hInst, hPere);
-	_hSelf = ::CreateWindowEx(
+   _hSelf = ::CreateWindowEx(
 					0,\
 					TEXT("Scintilla"),\
 					TEXT("Notepad++"),\
@@ -208,7 +208,7 @@ void ScintillaEditView::init(HINSTANCE hInst, HWND hPere)
 	_pScintillaFunc = (SCINTILLA_FUNC)::SendMessage(_hSelf, SCI_GETDIRECTFUNCTION, 0, 0);
 	_pScintillaPtr = (SCINTILLA_PTR)::SendMessage(_hSelf, SCI_GETDIRECTPOINTER, 0, 0);
 
-	_userDefineDlg.init(_hInst, _hParent, this);
+    _userDefineDlg.init(_hInst, _hParent, this);
 
 	if (!_pScintillaFunc)
 	{
@@ -220,10 +220,10 @@ void ScintillaEditView::init(HINSTANCE hInst, HWND hPere)
 		throw std::runtime_error("ScintillaEditView::init : SCI_GETDIRECTPOINTER message failed");
 	}
 
-	execute(SCI_SETMARGINMASKN, _SC_MARGE_FOLDER, SC_MASK_FOLDERS);
-	showMargin(_SC_MARGE_FOLDER, true);
+    execute(SCI_SETMARGINMASKN, _SC_MARGE_FOLDER, SC_MASK_FOLDERS);
+    showMargin(_SC_MARGE_FOLDER, true);
 
-	execute(SCI_SETMARGINMASKN, _SC_MARGE_SYBOLE, (1<<MARK_BOOKMARK) | (1<<MARK_HIDELINESBEGIN) | (1<<MARK_HIDELINESEND) | (1<<MARK_HIDELINESUNDERLINE));
+    execute(SCI_SETMARGINMASKN, _SC_MARGE_SYBOLE, (1<<MARK_BOOKMARK) | (1<<MARK_HIDELINESBEGIN) | (1<<MARK_HIDELINESEND) | (1<<MARK_HIDELINESUNDERLINE));
 
 	execute(SCI_MARKERSETALPHA, MARK_BOOKMARK, 70);
 
@@ -1429,7 +1429,7 @@ void ScintillaEditView::defineDocType(LangType typeDoc)
     }
 	setSpecialIndicator(*pStyle);
 
-    // Il faut surtout faire un test ici avant d'exécuter SCI_SETCODEPAGE
+    // Il faut surtout faire un test ici avant d'exï¿½cuter SCI_SETCODEPAGE
     // Sinon y'aura un soucis de performance!
 	if (isCJK())
 	{
@@ -2575,28 +2575,28 @@ void ScintillaEditView::performGlobalStyles()
 		execute(SCI_SETCARETLINEBACK, style._bgColor);
 	}
 
-	COLORREF selectColorBack = grey;
+    COLORREF selectColorBack = grey;
 	COLORREF selectColorFore = black;
 	i = stylers.getStylerIndexByName(TEXT("Selected text colour"));
 	if (i != -1)
-	{
-		Style & style = stylers.getStyler(i);
+    {
+        Style & style = stylers.getStyler(i);
 		selectColorBack = style._bgColor;
 		selectColorFore = style._fgColor;
-	}
+    }
 	execute(SCI_SETSELBACK, 1, selectColorBack);
 
 	if (nppParams.isSelectFgColorEnabled())
 		execute(SCI_SETSELFORE, 1, selectColorFore);
 
-	COLORREF caretColor = black;
+    COLORREF caretColor = black;
 	i = stylers.getStylerIndexByID(SCI_SETCARETFORE);
 	if (i != -1)
-	{
-		Style & style = stylers.getStyler(i);
-		caretColor = style._fgColor;
-	}
-	execute(SCI_SETCARETFORE, caretColor);
+    {
+        Style & style = stylers.getStyler(i);
+        caretColor = style._fgColor;
+    }
+    execute(SCI_SETCARETFORE, caretColor);
 
 	COLORREF edgeColor = liteGrey;
 	i = stylers.getStylerIndexByName(TEXT("Edge colour"));
