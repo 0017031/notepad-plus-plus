@@ -55,7 +55,7 @@ void printStr(const TCHAR *str2print)
 generic_string commafyInt(size_t n)
 {
 	generic_stringstream ss;
-	ss.imbue(std::locale(""));
+	ss.imbue(std::locale());
 	ss << n;
 	return ss.str();
 }
@@ -1264,18 +1264,23 @@ bool isAssoCommandExisting(LPCTSTR FullPathName)
 
 std::wstring s2ws(const std::string& str)
 {
-	using convert_typeX = std::codecvt_utf8<wchar_t>;
-	std::wstring_convert<convert_typeX, wchar_t> converterX;
-
-	return converterX.from_bytes(str);
+    auto converted_buffer_size_in_characters =
+         MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.size(), nullptr, 0);
+    std::wstring my_wstring(converted_buffer_size_in_characters, wchar_t{});
+    auto my_buffer = my_wstring.data();
+    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.size(), my_buffer, converted_buffer_size_in_characters);
+    return my_wstring;
 }
 
 std::string ws2s(const std::wstring& wstr)
 {
-	using convert_typeX = std::codecvt_utf8<wchar_t>;
-	std::wstring_convert<convert_typeX, wchar_t> converterX;
-
-	return converterX.to_bytes(wstr);
+    auto converted_buffer_size_in_characters =
+            WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), wstr.size(), nullptr, 0, NULL, NULL);
+    std::string my_string(converted_buffer_size_in_characters, char{});
+    auto my_buffer = my_string.data();
+    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), wstr.size(), my_buffer, converted_buffer_size_in_characters,
+            NULL, NULL);
+    return my_string;
 }
 
 bool deleteFileOrFolder(const generic_string& f2delete)

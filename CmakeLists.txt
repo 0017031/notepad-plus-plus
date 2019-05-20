@@ -1,0 +1,71 @@
+cmake_minimum_required(VERSION 3.12)
+
+project(My_Notepad++ CXX)
+
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+#set(CXXSTD c++17)
+
+option(BUILD_32BIT "On, if building 32bit exe" ON) # command line: cmake . -DBUILD_32BIT=OFF or -DBUILD_32BIT=ON
+message("PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}")
+
+#add_subdirectory(myscintilla)
+#add_subdirectory(e:/DOn_NOT_sync/scintilla E:/DOn_NOT_sync/scintilla/bin) #SciLexer_notepad_Static
+
+add_executable(jtemp EXCLUDE_FROM_ALL tmp/jtmp1.cpp)
+target_compile_features(jtemp PRIVATE cxx_std_17)
+
+add_executable(NotePad++ WIN32
+        PowerEditor/src/MISC/Common/LongRunningOperation.cpp PowerEditor/src/MISC/Common/mutex.cpp PowerEditor/src/MISC/Common/verifySignedfile.cpp PowerEditor/src/MISC/md5/md5Dlgs.cpp PowerEditor/src/MISC/sha2/sha-256.cpp PowerEditor/src/WinControls/AboutDlg/AboutDlg.cpp PowerEditor/src/WinControls/AnsiCharPanel/ansiCharPanel.cpp PowerEditor/src/ScitillaComponent/AutoCompletion.cpp PowerEditor/src/WinControls/AnsiCharPanel/asciiListView.cpp PowerEditor/src/WinControls/DocumentMap/documentSnapshot.cpp PowerEditor/src/WinControls/Grid/BabyGrid.cpp PowerEditor/src/WinControls/Grid/BabyGridWrapper.cpp PowerEditor/src/ScitillaComponent/Buffer.cpp PowerEditor/src/uchardet/CharDistribution.cpp PowerEditor/src/WinControls/ClipboardHistory/clipboardHistoryPanel.cpp PowerEditor/src/WinControls/ColourPicker/ColourPicker.cpp PowerEditor/src/WinControls/ColourPicker/ColourPopup.cpp PowerEditor/src/ScitillaComponent/columnEditor.cpp PowerEditor/src/MISC/Common/Common.cpp PowerEditor/src/WinControls/ContextMenu/ContextMenu.cpp PowerEditor/src/WinControls/PluginsAdmin/pluginsAdmin.cpp PowerEditor/src/WinControls/TabBar/ControlsTab.cpp PowerEditor/src/WinControls/DockingWnd/DockingCont.cpp PowerEditor/src/WinControls/DockingWnd/DockingManager.cpp PowerEditor/src/WinControls/DockingWnd/DockingSplitter.cpp PowerEditor/src/ScitillaComponent/DocTabView.cpp PowerEditor/src/WinControls/DocumentMap/documentMap.cpp PowerEditor/src/EncodingMapper.cpp PowerEditor/src/WinControls/OpenSaveFileDialog/FileDialog.cpp PowerEditor/src/WinControls/FindCharsInRange/FindCharsInRange.cpp PowerEditor/src/ScitillaComponent/FindReplaceDlg.cpp PowerEditor/src/ScitillaComponent/FunctionCallTip.cpp PowerEditor/src/WinControls/FunctionList/functionListPanel.cpp PowerEditor/src/WinControls/FunctionList/functionParser.cpp PowerEditor/src/ScitillaComponent/GoToLineDlg.cpp PowerEditor/src/WinControls/DockingWnd/Gripper.cpp PowerEditor/src/MISC/PluginsManager/IDAllocator.cpp PowerEditor/src/WinControls/ImageListSet/ImageListSet.cpp PowerEditor/src/uchardet/JpCntx.cpp PowerEditor/src/uchardet/LangBulgarianModel.cpp PowerEditor/src/uchardet/LangCyrillicModel.cpp PowerEditor/src/uchardet/LangGreekModel.cpp PowerEditor/src/uchardet/LangHebrewModel.cpp PowerEditor/src/uchardet/LangHungarianModel.cpp PowerEditor/src/uchardet/LangThaiModel.cpp PowerEditor/src/lastRecentFileList.cpp PowerEditor/src/lesDlgs.cpp PowerEditor/src/WinControls/AnsiCharPanel/ListView.cpp PowerEditor/src/localization.cpp PowerEditor/src/MISC/Exception/MiniDumper.cpp PowerEditor/src/Notepad_plus.cpp PowerEditor/src/Notepad_plus_Window.cpp PowerEditor/src/NppBigSwitch.cpp PowerEditor/src/NppCommands.cpp PowerEditor/src/NppIO.cpp PowerEditor/src/NppNotification.cpp PowerEditor/src/uchardet/nsBig5Prober.cpp PowerEditor/src/uchardet/nsCharSetProber.cpp PowerEditor/src/uchardet/nsEscCharsetProber.cpp PowerEditor/src/uchardet/nsEscSM.cpp PowerEditor/src/uchardet/nsEUCJPProber.cpp PowerEditor/src/uchardet/nsEUCKRProber.cpp PowerEditor/src/uchardet/nsEUCTWProber.cpp PowerEditor/src/uchardet/nsGB2312Prober.cpp PowerEditor/src/uchardet/nsHebrewProber.cpp PowerEditor/src/uchardet/nsLatin1Prober.cpp PowerEditor/src/uchardet/nsMBCSGroupProber.cpp PowerEditor/src/uchardet/nsMBCSSM.cpp PowerEditor/src/uchardet/nsSBCharSetProber.cpp PowerEditor/src/uchardet/nsSBCSGroupProber.cpp PowerEditor/src/uchardet/nsSJISProber.cpp PowerEditor/src/uchardet/nsUniversalDetector.cpp PowerEditor/src/uchardet/nsUTF8Prober.cpp PowerEditor/src/Parameters.cpp PowerEditor/src/Misc/PluginsManager/PluginsManager.cpp PowerEditor/src/WinControls/Preference/preferenceDlg.cpp PowerEditor/src/ScitillaComponent/Printer.cpp PowerEditor/src/MISC/Process/Processus.cpp PowerEditor/src/WinControls/ProjectPanel/ProjectPanel.cpp PowerEditor/src/MISC/RegExt/regExtDlg.cpp PowerEditor/src/WinControls/StaticDialog/RunDlg/RunDlg.cpp PowerEditor/src/WinControls/shortcut/RunMacroDlg.cpp PowerEditor/src/ScitillaComponent/ScintillaCtrls.cpp PowerEditor/src/ScitillaComponent/ScintillaEditView.cpp PowerEditor/src/WinControls/shortcut/shortcut.cpp PowerEditor/src/WinControls/Grid/ShortcutMapper.cpp PowerEditor/src/WinControls/WindowsDlg/SizeableDlg.cpp PowerEditor/src/ScitillaComponent/SmartHighlighter.cpp PowerEditor/src/WinControls/SplitterContainer/Splitter.cpp PowerEditor/src/WinControls/SplitterContainer/SplitterContainer.cpp PowerEditor/src/WinControls/StaticDialog/StaticDialog.cpp PowerEditor/src/WinControls/StatusBar/StatusBar.cpp PowerEditor/src/WinControls/TabBar/TabBar.cpp PowerEditor/src/WinControls/TaskList/TaskList.cpp PowerEditor/src/WinControls/TaskList/TaskListDlg.cpp PowerEditor/src/TinyXml/tinystr.cpp PowerEditor/src/TinyXml/tinyXmlA/tinystrA.cpp PowerEditor/src/TinyXml/tinyxml.cpp PowerEditor/src/TinyXml/tinyXmlA/tinyxmlA.cpp PowerEditor/src/TinyXml/tinyxmlerror.cpp PowerEditor/src/TinyXml/tinyXmlA/tinyxmlerrorA.cpp PowerEditor/src/TinyXml/tinyxmlparser.cpp PowerEditor/src/TinyXml/tinyXmlA/tinyxmlparserA.cpp PowerEditor/src/WinControls/ToolBar/ToolBar.cpp PowerEditor/src/WinControls/ToolTip/ToolTip.cpp PowerEditor/src/WinControls/TrayIcon/trayIconControler.cpp PowerEditor/src/WinControls/ProjectPanel/TreeView.cpp PowerEditor/src/uchardet/uchardet.cpp PowerEditor/src/UniConversion.cpp PowerEditor/src/WinControls/AboutDlg/URLCtrl.cpp PowerEditor/src/ScitillaComponent/UserDefineDialog.cpp PowerEditor/src/Utf8_16.cpp PowerEditor/src/WinControls/VerticalFileSwitcher/VerticalFileSwitcher.cpp PowerEditor/src/WinControls/VerticalFileSwitcher/VerticalFileSwitcherListView.cpp PowerEditor/src/MISC/Exception/Win32Exception.cpp PowerEditor/src/WinControls/WindowsDlg/WindowsDlg.cpp PowerEditor/src/winmain.cpp PowerEditor/src/WinControls/WindowsDlg/WinMgr.cpp PowerEditor/src/WinControls/WindowsDlg/WinRect.cpp PowerEditor/src/WinControls/ColourPicker/WordStyleDlg.cpp PowerEditor/src/ScitillaComponent/xmlMatchedTagsHighlighter.cpp PowerEditor/src/WinControls/FileBrowser/fileBrowser.cpp PowerEditor/src/WinControls/ReadDirectoryChanges/ReadDirectoryChanges.cpp PowerEditor/src/WinControls/ReadDirectoryChanges/ReadDirectoryChangesPrivate.cpp
+        PowerEditor/src/MISC/md5/md5Dlgs.rc PowerEditor/src/WinControls/AnsiCharPanel/ansiCharPanel.rc PowerEditor/src/WinControls/ClipboardHistory/clipboardHistoryPanel.rc PowerEditor/src/WinControls/ColourPicker/ColourPopup.rc PowerEditor/src/ScitillaComponent/columnEditor.rc PowerEditor/src/WinControls/DockingWnd/DockingGUIWidget.rc PowerEditor/src/WinControls/DocumentMap/documentMap.rc PowerEditor/src/WinControls/DocumentMap/documentSnapshot.rc PowerEditor/src/WinControls/FindCharsInRange/findCharsInRange.rc PowerEditor/src/ScitillaComponent/FindReplaceDlg.rc PowerEditor/src/WinControls/FunctionList/functionListPanel.rc PowerEditor/src/Notepad_plus.rc PowerEditor/src/WinControls/PluginsAdmin/pluginsAdmin.rc PowerEditor/src/WinControls/Preference/preference.rc PowerEditor/src/WinControls/ProjectPanel/ProjectPanel.rc PowerEditor/src/MISC/RegExt/regExtDlg.rc PowerEditor/src/WinControls/StaticDialog/RunDlg/RunDlg.rc PowerEditor/src/WinControls/shortcut/RunMacroDlg.rc PowerEditor/src/WinControls/shortcut/shortcut.rc PowerEditor/src/WinControls/Grid/ShortcutMapper.rc PowerEditor/src/WinControls/TaskList/TaskListDlg.rc PowerEditor/src/ScitillaComponent/UserDefineDialog.rc PowerEditor/src/WinControls/VerticalFileSwitcher/VerticalFileSwitcher.rc PowerEditor/src/WinControls/WindowsDlg/WindowsDlg.rc PowerEditor/src/WinControls/ColourPicker/WordStyleDlg.rc PowerEditor/src/WinControls/FileBrowser/fileBrowser.rc
+        PowerEditor/src/dpiAware.manifest PowerEditor/src/notepad++.exe.manifest
+        )
+target_include_directories(NotePad++ SYSTEM PRIVATE
+        PowerEditor/src/TinyXml/ PowerEditor/src/TinyXml/tinyXmlA/ )
+target_include_directories(NotePad++ PRIVATE
+        PowerEditor/src/ PowerEditor/src/MISC/ PowerEditor/src/MISC/Common/ PowerEditor/src/MISC/Exception/ PowerEditor/src/MISC/PluginsManager/ PowerEditor/src/MISC/Process/ PowerEditor/src/MISC/RegExt/ PowerEditor/src/MISC/md5/ PowerEditor/src/MISC/sha2/ PowerEditor/src/ScitillaComponent/ PowerEditor/src/WinControls/ PowerEditor/src/WinControls/AboutDlg/ PowerEditor/src/WinControls/AnsiCharPanel/ PowerEditor/src/WinControls/ClipboardHistory/ PowerEditor/src/WinControls/ColourPicker/ PowerEditor/src/WinControls/ContextMenu/ PowerEditor/src/WinControls/DockingWnd/ PowerEditor/src/WinControls/DocumentMap/ PowerEditor/src/WinControls/FileBrowser/ PowerEditor/src/WinControls/FindCharsInRange/ PowerEditor/src/WinControls/FunctionList/ PowerEditor/src/WinControls/Grid/ PowerEditor/src/WinControls/ImageListSet/ PowerEditor/src/WinControls/OpenSaveFileDialog/ PowerEditor/src/WinControls/PluginsAdmin/ PowerEditor/src/WinControls/Preference/ PowerEditor/src/WinControls/ProjectPanel/ PowerEditor/src/WinControls/ReadDirectoryChanges/ PowerEditor/src/WinControls/SplitterContainer/ PowerEditor/src/WinControls/StaticDialog/ PowerEditor/src/WinControls/StaticDialog/RunDlg/ PowerEditor/src/WinControls/StatusBar/ PowerEditor/src/WinControls/TabBar/ PowerEditor/src/WinControls/TaskList/ PowerEditor/src/WinControls/ToolBar/ PowerEditor/src/WinControls/ToolTip/ PowerEditor/src/WinControls/TrayIcon/ PowerEditor/src/WinControls/VerticalFileSwitcher/ PowerEditor/src/WinControls/WindowsDlg/ PowerEditor/src/WinControls/shortcut/ PowerEditor/src/uchardet/ PowerEditor/src/json/
+        scintilla/include
+        )
+
+target_compile_features(NotePad++ PRIVATE cxx_std_17)
+
+if (MSVC)
+    target_compile_options(NotePad++ PRIVATE /W4 /MP /EHa) # /WX
+    target_compile_definitions(NotePad++ PRIVATE -DUNICODE -D_UNICODE -D_WIN32_WINNT=0x501 -D_USE_64BIT_TIME_T -DTIXML_USE_STL -DTIXMLA_USE_STL -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS
+            $<$<CONFIG:Debug>:DEBUG _DEBUG>
+            $<$<CONFIG:Release>:NDEBUG >
+            )
+else () # MingW
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-include ${PROJECT_SOURCE_DIR}/PowerEditor/gcc/include/various.h")
+    target_sources(NotePad++ PRIVATE PowerEditor/gcc/include/various.h)
+    target_include_directories(NotePad++ PRIVATE PowerEditor/gcc/include)
+
+    target_link_libraries(NotePad++ PRIVATE stdc++fs)
+    #    target_link_libraries(NotePad++ PRIVATE SciLexer_notepad_Shared)
+    #    target_link_libraries(NotePad++ PRIVATE SciLexer_notepad_Static)
+    target_link_libraries(NotePad++ PRIVATE comctl32 shlwapi dbghelp version crypt32 wintrust)
+    if (BUILD_32BIT)
+        target_link_libraries(NotePad++ PRIVATE C:/Windows/SysWOW64/SensApi.dll)
+    else ()
+        target_link_libraries(NotePad++ PRIVATE sensapi)
+    endif ()
+    #    target_link_options(NotePad++ PRIVATE -static  -static-libstdc++) #-static-libgcc
+
+    target_compile_options(NotePad++ PRIVATE
+            -Wfatal-errors -Wall -Wextra -pedantic -fpermissive # -Werror
+            -march=core2
+            $<$<CONFIG:Debug>:  -g> # -Og
+            $<$<CONFIG:Release>:-O3 -s>
+            )
+    if (BUILD_32BIT)
+        target_compile_options(NotePad++ PRIVATE -m32)
+        target_link_options(NotePad++ PRIVATE "-Wl,--enable-stdcall-fixup")
+    else ()
+        target_compile_options(NotePad++ PRIVATE -m64)
+    endif ()
+
+    target_compile_definitions(NotePad++ PRIVATE -DUNICODE -D_UNICODE -D_USE_64BIT_TIME_T -DTIXML_USE_STL -DTIXMLA_USE_STL
+            $<$<CONFIG:Debug>:DEBUG _DEBUG>
+            $<$<CONFIG:Release>:NDEBUG >
+            )
+
+endif ()
