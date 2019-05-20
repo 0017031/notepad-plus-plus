@@ -41,6 +41,7 @@
 #include "PluginsManager.h"
 #include "verifySignedFile.h"
 #include "LongRunningOperation.h"
+#include <filesystem>
 
 #define TEXTFILE        256
 #define IDR_PLUGINLISTJSONFILE  101
@@ -434,6 +435,7 @@ PluginsAdminDlg::PluginsAdminDlg()
 
 #ifdef DEBUG // if not debug, then it's release
 	// load from nppPluginList.json instead of nppPluginList.dll
+    //https://raw.githubusercontent.com/notepad-plus-plus/nppPluginList/master/src/pl.x64.json
 	PathAppend(_pluginListFullPath, TEXT("nppPluginList.json"));
 #else //RELEASE
 	PathAppend(_pluginListFullPath, TEXT("nppPluginList.dll"));
@@ -747,9 +749,9 @@ bool PluginsAdminDlg::updateListAndLoadFromJson()
 		json j;
 
 #ifdef DEBUG // if not debug, then it's release
-
+		auto myPath= std::filesystem::path(_pluginListFullPath);
 		// load from nppPluginList.json instead of nppPluginList.dll
-		ifstream nppPluginListJson(_pluginListFullPath);
+		ifstream nppPluginListJson(myPath.string());
 		nppPluginListJson >> j;
 
 #else //RELEASE

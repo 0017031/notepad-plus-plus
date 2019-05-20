@@ -1555,7 +1555,7 @@ bool StringDlg::isAllowed(const generic_string & txt)
 {
 	for (auto ch : txt)
 	{
-		if (std::find(_restrictedChars.cbegin(), _restrictedChars.cend(), ch) != _restrictedChars.cend())
+		if (_restrictedChars.find(ch) != generic_string::npos)
 			return false;
 	}
 	return true;

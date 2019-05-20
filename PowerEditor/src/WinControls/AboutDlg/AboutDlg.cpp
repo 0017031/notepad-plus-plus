@@ -128,7 +128,9 @@ INT_PTR CALLBACK DebugInfoDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM /
 			NppParameters *pNppParam = NppParameters::getInstance();
 
 			// Notepad++ version
-			_debugInfoStr = NOTEPAD_PLUS_VERSION;
+			// _debugInfoStr = NOTEPAD_PLUS_VERSION;
+			_debugInfoStr = TEXT("vs2019.edge");
+
 			_debugInfoStr += pNppParam->isx64() ? TEXT("   (64-bit)") : TEXT("   (32-bit)");
 			_debugInfoStr += TEXT("\r\n");
 
