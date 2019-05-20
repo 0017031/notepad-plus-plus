@@ -503,6 +503,7 @@ void FileManager::checkFilesystemChanges(bool bCheckOnlyCurrentBuffer)
 {
 	if (bCheckOnlyCurrentBuffer)
 	{
+        if (!_pNotepadPlus) return;
 		Buffer* buffer = _pNotepadPlus->getCurrentBuffer();
 		buffer->checkFileState();
 	}

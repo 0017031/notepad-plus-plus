@@ -19,6 +19,7 @@
 #include "ScintillaEditView.h"
 #include "localization.h"
 #include <fstream>
+#include <filesystem>
 
 using nlohmann::json;
 using namespace std;
@@ -306,6 +307,10 @@ bool FunctionListPanel::serialize(const generic_string & outputFilename)
 			j[leavesLabel].push_back(leafName.c_str());
 		}
 	}
+
+//   auto myPath= std::filesystem::path(fname2write);
+//	std::ofstream file(myPath.string());
+
 
 	std::ofstream file(wmc.wchar2char(fname2write.c_str(), CP_ACP));
 	file << j;

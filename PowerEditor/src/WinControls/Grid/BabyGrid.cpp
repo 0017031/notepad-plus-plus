@@ -95,7 +95,7 @@ struct _gridhandlestruct
         //int wannabewidth; //obsolete
 		BOOL INITIALCONTENT;
 
-    } BGHS[MAX_GRIDS];
+    } BGHS[MAX_GRIDS+1];
 
 
 _BGCELL BGcell,*LPBGcell;
@@ -1333,9 +1333,10 @@ LRESULT CALLBACK GridProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 	SelfIndex=FindGrid(GetMenu(hWnd));
-    SelfMenu=BGHS[SelfIndex].gridmenu;
+    //SelfMenu=BGHS[SelfIndex].gridmenu;
 
 	//update the grid width and height variable
+
 	{
 	 RECT rect;
 
@@ -3144,10 +3145,10 @@ int AddGrid( HMENU menuid)
 
 int FindGrid( HMENU menuid)
     {
-     //if grid doesn't exist, return -1, else return gridindex
+     //if grid doesn't exist, return MAX_GRIDS, else return gridindex
      int returnvalue;
      int j;
-     returnvalue = -1;
+     returnvalue = MAX_GRIDS;
      for(j=0;j<MAX_GRIDS;j++)
          {
           if(BGHS[j].gridmenu == menuid)

@@ -1220,4 +1220,3 @@ INT_PTR CALLBACK PluginsAdminDlg::run_dlgProc(UINT message, WPARAM wParam, LPARA
 	}
 	return FALSE;
 }
-

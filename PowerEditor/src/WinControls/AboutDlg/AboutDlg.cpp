@@ -40,7 +40,7 @@ INT_PTR CALLBACK AboutDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lPara
 			buildTime +=  wmc.char2wchar(__TIME__, CP_ACP);
 
 			NppParameters& nppParam = NppParameters::getInstance();
-			LPCTSTR bitness = nppParam.archType() == IMAGE_FILE_MACHINE_I386 ? TEXT("(32-bit)") : (nppParam.archType() == IMAGE_FILE_MACHINE_AMD64 ? TEXT("(64-bit)") : TEXT("(ARM 64-bit)"));
+			LPCTSTR bitness = nppParam.isx64() ? TEXT("(64-bit)") : TEXT("(32-bit)");
 			::SetDlgItemText(_hSelf, IDC_VERSION_BIT, bitness);
 
 			::SendMessage(compileDateHandle, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(buildTime.c_str()));
@@ -52,7 +52,7 @@ INT_PTR CALLBACK AboutDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lPara
             //_emailLink.init(_hInst, _hSelf);
 			//_emailLink.create(::GetDlgItem(_hSelf, IDC_AUTHOR_NAME), TEXT("mailto:don.h@free.fr"));
 			//_emailLink.create(::GetDlgItem(_hSelf, IDC_AUTHOR_NAME), TEXT("https://notepad-plus-plus.org/news/v781-free-uyghur-edition/"));
-			//_emailLink.create(::GetDlgItem(_hSelf, IDC_AUTHOR_NAME), TEXT("https://notepad-plus-plus.org/news/v792-stand-with-hong-kong/"));
+			_emailLink.create(::GetDlgItem(_hSelf, IDC_AUTHOR_NAME), TEXT("https://notepad-plus-plus.org/news/v792-stand-with-hong-kong/"));
 			//_emailLink.create(::GetDlgItem(_hSelf, IDC_AUTHOR_NAME), TEXT("https://notepad-plus-plus.org/news/v791-pour-samuel-paty/"));
 
             _pageLink.init(_hInst, _hSelf);
@@ -123,6 +123,8 @@ INT_PTR CALLBACK DebugInfoDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM /
 
 			// Notepad++ version
 			_debugInfoStr = NOTEPAD_PLUS_VERSION;
+
+			_debugInfoStr += TEXT(" my.edge ");
 			_debugInfoStr += nppParam.archType() == IMAGE_FILE_MACHINE_I386 ? TEXT("   (32-bit)") : (nppParam.archType() == IMAGE_FILE_MACHINE_AMD64 ? TEXT("   (64-bit)") : TEXT("   (ARM 64-bit)"));
 			_debugInfoStr += TEXT("\r\n");
 
@@ -143,11 +145,6 @@ INT_PTR CALLBACK DebugInfoDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM /
 			_debugInfoStr += nppFullPath;
 			_debugInfoStr += TEXT("\r\n");
 
-			// Command line as specified for program launch
-			_debugInfoStr += TEXT("Command Line : ");
-			_debugInfoStr += nppParam.getCmdLineString();
-			_debugInfoStr += TEXT("\r\n");
-
 			// Administrator mode
 			_debugInfoStr += TEXT("Admin mode : ");
 			_debugInfoStr += (_isAdmin ? TEXT("ON") : TEXT("OFF"));
@@ -157,12 +154,6 @@ INT_PTR CALLBACK DebugInfoDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM /
 			_debugInfoStr += TEXT("Local Conf mode : ");
 			bool doLocalConf = (NppParameters::getInstance()).isLocal();
 			_debugInfoStr += (doLocalConf ? TEXT("ON") : TEXT("OFF"));
-			_debugInfoStr += TEXT("\r\n");
-
-			// Cloud config directory
-			_debugInfoStr += TEXT("Cloud Config : ");
-			const generic_string& cloudPath = nppParam.getNppGUI()._cloudPath;
-			_debugInfoStr += cloudPath.empty() ? _T("OFF") : cloudPath;
 			_debugInfoStr += TEXT("\r\n");
 
 			// OS information
