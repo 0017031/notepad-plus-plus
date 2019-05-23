@@ -1,3 +1,12 @@
+*.orig
+
+.idea/
+*build*/
+*release*/
+scintilla/win32/packages/
+sourceTrail.prj/
+
+
 #-------------------------------------------------------------------------------
 # VisualStudio
 
