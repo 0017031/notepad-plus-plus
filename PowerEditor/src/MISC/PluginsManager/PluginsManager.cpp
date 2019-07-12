@@ -703,4 +703,3 @@ generic_string PluginsManager::getLoadedPluginNames() const
 	}
 	return pluginPaths;
 }
-
