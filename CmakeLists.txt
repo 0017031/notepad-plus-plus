@@ -8,8 +8,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 option(BUILD_32BIT "On, if building 32bit exe" ON) # command line: cmake . -DBUILD_32BIT=OFF or -DBUILD_32BIT=ON
 message("PROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}")
 
-#add_subdirectory(myscintilla)
-#add_subdirectory(e:/DOn_NOT_sync/scintilla E:/DOn_NOT_sync/scintilla/bin) #SciLexer_notepad_Static
+add_subdirectory(myScintilla_submodule ) #EXCLUDE_FROM_ALL
 
 add_executable(jtemp EXCLUDE_FROM_ALL tmp/jtmp1.cpp)
 target_compile_features(jtemp PRIVATE cxx_std_17)
@@ -57,10 +56,10 @@ else () # MingW
             $<$<CONFIG:Release>:-O3 -s>
             )
     if (BUILD_32BIT)
-        target_compile_options(NotePad++ PRIVATE -m32)
+        target_compile_options(NotePad++ PRIVATE -m32 -march=native)
         target_link_options(NotePad++ PRIVATE "-Wl,--enable-stdcall-fixup")
     else ()
-        target_compile_options(NotePad++ PRIVATE -m64)
+        target_compile_options(NotePad++ PRIVATE -m64 -march=native)
     endif ()
 
     target_compile_definitions(NotePad++ PRIVATE -DUNICODE -D_UNICODE -D_USE_64BIT_TIME_T -DTIXML_USE_STL -DTIXMLA_USE_STL
