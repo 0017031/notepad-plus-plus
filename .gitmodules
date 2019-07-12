@@ -1,0 +1,4 @@
+[submodule "myScintilla_submodule"]
+	path = myScintilla_submodule
+	url = https://github.com/0017031/scintilla
+	branch = npp-patch_rebase-on_master
