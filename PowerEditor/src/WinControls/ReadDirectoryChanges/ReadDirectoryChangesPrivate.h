@@ -26,6 +26,12 @@
 //	http://qualapps.blogspot.com/2010/05/understanding-readdirectorychangesw.html
 //	See ReadMe.txt for overview information.
 
+#ifndef _MSC_VER
+#define __in
+#include <cassert>
+#define _ASSERTE assert
+#endif
+
 class CReadDirectoryChanges;
 
 namespace ReadDirectoryChangesPrivate

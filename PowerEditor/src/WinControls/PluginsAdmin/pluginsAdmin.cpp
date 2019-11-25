@@ -41,6 +41,8 @@
 #include "PluginsManager.h"
 #include "verifySignedfile.h"
 
+#include <filesystem>
+
 #define TEXTFILE        256
 #define IDR_PLUGINLISTJSONFILE  101
 
@@ -752,14 +754,19 @@ bool PluginsAdminDlg::updateListAndLoadFromJson()
 
 		json j;
 
-#ifdef DEBUG // if not debug, then it's release
+#if 1 //def DEBUG // if not debug, then it's release
 
+	//first try list, then dll
+	if (::PathFileExists(_pluginListFullPath.c_str()))
+	{
 		// load from nppPluginList.json instead of nppPluginList.dll
-		ifstream nppPluginListJson(_pluginListFullPath);
+	    auto myPath= std::filesystem::path(_pluginListFullPath);
+		ifstream nppPluginListJson(myPath.string());
 		nppPluginListJson >> j;
-
-#else //RELEASE
-
+	} 
+	else 
+	{
+// #else //RELEASE
 		hLib = ::LoadLibraryEx(_pluginListFullPath.c_str(), 0, LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
 
 		if (!hLib)
@@ -793,7 +800,7 @@ bool PluginsAdminDlg::updateListAndLoadFromJson()
 		j = j.parse(buffer);
 
 		delete[] buffer;
-
+	}
 #endif
 		// if absent then download it
 

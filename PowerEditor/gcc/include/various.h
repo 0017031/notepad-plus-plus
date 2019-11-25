@@ -48,5 +48,6 @@ static inline int min(unsigned int a, unsigned int b) {
 //double _wtof(const wchar_t * string);
 
 // from MinGW include/driverspecs.h
-#define __inout
-#define __inout_opt
+// #define __in
+// #define __inout
+// #define __inout_opt
