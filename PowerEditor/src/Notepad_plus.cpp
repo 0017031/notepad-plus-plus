@@ -17,6 +17,7 @@
 #include <time.h>
 #include <shlwapi.h>
 #include <wininet.h>
+#include <tchar.h>
 #include "Notepad_plus.h"
 #include "Notepad_plus_Window.h"
 #include "CustomFileDialog.h"

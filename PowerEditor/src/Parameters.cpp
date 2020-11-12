@@ -424,6 +424,7 @@ static const WinMenuKeyDefinition winKeyDefs[] =
 */
 static const ScintillaKeyDefinition scintKeyDefs[] =
 {
+	{TEXT("SCI_MULTIPLESELECTADDNEXT"),   SCI_MULTIPLESELECTADDNEXT,   true,  false, false, VK_W,        0},
 	{TEXT("SCI_CUT"),                     SCI_CUT,                     true,  false, false, VK_X,        IDM_EDIT_CUT},
 	{TEXT(""),                            SCI_CUT,                     false, false, true,  VK_DELETE,   0},
 	{TEXT("SCI_COPY"),                    SCI_COPY,                    true,  false, false, VK_C,        IDM_EDIT_COPY},

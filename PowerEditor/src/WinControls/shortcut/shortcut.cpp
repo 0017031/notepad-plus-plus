@@ -701,6 +701,7 @@ bool recordedMacroStep::isMacroable() const
 		case SCI_GOTOLINE:   // (int line)
 		case SCI_GOTOPOS:    // (int position)
 		case SCI_SETSELECTIONMODE:  // (int mode)
+		case SCI_MULTIPLESELECTADDNEXT:
 		case SCI_CUT:
 		case SCI_COPY:
 		case SCI_PASTE:
