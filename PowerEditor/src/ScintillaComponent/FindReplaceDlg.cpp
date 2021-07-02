@@ -2986,8 +2986,6 @@ void FindReplaceDlg::setStatusbarMessage(const generic_string & msg, FindStatus 
 
 	if (staus == FSNotFound)
 	{
-		if (!NppParameters::getInstance().getNppGUI()._muteSounds)
-			::MessageBeep(0xFFFFFFFF);
 
 		FLASHWINFO flashInfo;
 		flashInfo.cbSize = sizeof(FLASHWINFO);
